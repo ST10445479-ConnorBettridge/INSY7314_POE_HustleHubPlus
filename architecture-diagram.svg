@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 850" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#555"/>
+    </marker>
+    <linearGradient id="clientGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="serverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="securityGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4bc0c8;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#c779d0;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="routerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="850" fill="#f8f9fa" rx="10"/>
+
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#2c3e50">HustleHub+ - System Architecture Diagram (MERN Stack)</text>
+  <line x1="100" y1="50" x2="900" y2="50" stroke="#ddd" stroke-width="1"/>
+
+  <!-- ====== CLIENT LAYER ====== -->
+  <rect x="300" y="70" width="400" height="90" rx="8" fill="url(#clientGrad)" opacity="0.95"/>
+  <text x="500" y="100" text-anchor="middle" font-size="16" font-weight="bold" fill="white">CLIENT LAYER</text>
+  <text x="500" y="120" text-anchor="middle" font-size="12" fill="white" opacity="0.9">React Frontend (Future Implementation)</text>
+  <text x="500" y="140" text-anchor="middle" font-size="11" fill="white" opacity="0.8">HTTPS Requests / JWT Token Storage</text>
+
+  <!-- Arrow from Client to Server -->
+  <line x1="500" y1="160" x2="500" y2="225" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="515" y="195" font-size="10" fill="#666">HTTPS (TLS 1.3)</text>
+
+  <!-- ====== SYSTEM BOUNDARY ====== -->
+  <rect x="50" y="230" width="900" height="480" rx="12" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-dasharray="8,4"/>
+  <rect x="50" y="230" width="200" height="28" rx="6" fill="#2c3e50"/>
+  <text x="150" y="249" text-anchor="middle" font-size="13" font-weight="bold" fill="white">SYSTEM BOUNDARY</text>
+
+  <!-- ====== EXPRESS API SERVER ====== -->
+  <rect x="100" y="275" width="800" height="170" rx="10" fill="url(#serverGrad)" opacity="0.9"/>
+  <text x="500" y="300" text-anchor="middle" font-size="16" font-weight="bold" fill="white">EXPRESS API SERVER (Node.js)</text>
+
+  <!-- Route boxes inside server -->
+  <rect x="120" y="315" width="170" height="50" rx="6" fill="white" opacity="0.25"/>
+  <text x="205" y="337" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Auth Routes</text>
+  <text x="205" y="354" text-anchor="middle" font-size="10" fill="white" opacity="0.9">/register | /login | /profile</text>
+
+  <rect x="310" y="315" width="170" height="50" rx="6" fill="white" opacity="0.25"/>
+  <text x="395" y="337" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Gig Routes (Part 2)</text>
+  <text x="395" y="354" text-anchor="middle" font-size="10" fill="white" opacity="0.9">CRUD operations</text>
+
+  <rect x="500" y="315" width="170" height="50" rx="6" fill="white" opacity="0.25"/>
+  <text x="585" y="337" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Transaction Routes (P2)</text>
+  <text x="585" y="354" text-anchor="middle" font-size="10" fill="white" opacity="0.9">Income / Tax</text>
+
+  <!-- Middleware layer inside server -->
+  <text x="500" y="390" text-anchor="middle" font-size="11" font-weight="bold" fill="white" opacity="0.9">MIDDLEWARE PIPELINE</text>
+  <rect x="120" y="400" width="140" height="30" rx="5" fill="white" opacity="0.2"/>
+  <text x="190" y="420" text-anchor="middle" font-size="10" fill="white">Auth (JWT Verify)</text>
+  <rect x="280" y="400" width="140" height="30" rx="5" fill="white" opacity="0.2"/>
+  <text x="350" y="420" text-anchor="middle" font-size="10" fill="white">Validation</text>
+  <rect x="440" y="400" width="140" height="30" rx="5" fill="white" opacity="0.2"/>
+  <text x="510" y="420" text-anchor="middle" font-size="10" fill="white">Error Handler</text>
+  <rect x="600" y="400" width="140" height="30" rx="5" fill="white" opacity="0.2"/>
+  <text x="670" y="420" text-anchor="middle" font-size="10" fill="white">Logger (Winston)</text>
+
+  <!-- Arrow from Server to Security Layer -->
+  <line x1="500" y1="445" x2="500" y2="495" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ====== SECURITY LAYER ====== -->
+  <rect x="100" y="500" width="800" height="80" rx="10" fill="url(#securityGrad)" opacity="0.9"/>
+  <text x="500" y="523" text-anchor="middle" font-size="14" font-weight="bold" fill="white">SECURITY CONTROLS</text>
+
+  <rect x="120" y="535" width="140" height="30" rx="5" fill="white" opacity="0.25"/>
+  <text x="190" y="555" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Helmet (Headers)</text>
+
+  <rect x="280" y="535" width="140" height="30" rx="5" fill="white" opacity="0.25"/>
+  <text x="350" y="555" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Rate Limiting</text>
+
+  <rect x="440" y="535" width="140" height="30" rx="5" fill="white" opacity="0.25"/>
+  <text x="510" y="555" text-anchor="middle" font-size="10" font-weight="bold" fill="white">HTTPS / TLS</text>
+
+  <rect x="600" y="535" width="140" height="30" rx="5" fill="white" opacity="0.25"/>
+  <text x="670" y="555" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Input Validation</text>
+
+  <rect x="760" y="535" width="120" height="30" rx="5" fill="white" opacity="0.25"/>
+  <text x="820" y="555" text-anchor="middle" font-size="10" font-weight="bold" fill="white">CORS</text>
+
+  <!-- Arrow from Security to Data -->
+  <line x1="500" y1="580" x2="500" y2="625" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ====== DATA LAYER ====== -->
+  <rect x="100" y="630" width="800" height="65" rx="10" fill="url(#dataGrad)" opacity="0.9"/>
+  <text x="500" y="653" text-anchor="middle" font-size="14" font-weight="bold" fill="white">DATA STORES</text>
+
+  <rect x="120" y="663" width="240" height="25" rx="4" fill="white" opacity="0.25"/>
+  <text x="240" y="681" text-anchor="middle" font-size="10" font-weight="bold" fill="white">In-Memory Storage (Phase 1)</text>
+
+  <rect x="380" y="663" width="240" height="25" rx="4" fill="white" opacity="0.25"/>
+  <text x="500" y="681" text-anchor="middle" font-size="10" font-weight="bold" fill="white">MongoDB (Phase 2 - Future)</text>
+
+  <rect x="640" y="663" width="240" height="25" rx="4" fill="white" opacity="0.25"/>
+  <text x="760" y="681" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Log Files (Winston)</text>
+
+  <!-- Legend -->
+  <rect x="50" y="735" width="900" height="95" rx="8" fill="#eef2f7"/>
+  <text x="500" y="755" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">Security Boundaries</text>
+
+  <rect x="80" y="768" width="15" height="15" rx="3" fill="#667eea"/>
+  <text x="100" y="780" font-size="10" fill="#333">Client Boundary</text>
+
+  <rect x="280" y="768" width="15" height="15" rx="3" fill="#4facfe"/>
+  <text x="300" y="780" font-size="10" fill="#333">API Boundary</text>
+
+  <rect x="480" y="768" width="15" height="15" rx="3" fill="#f5576c"/>
+  <text x="500" y="780" font-size="10" fill="#333">Security Boundary</text>
+
+  <rect x="680" y="768" width="15" height="15" rx="3" fill="#4bc0c8"/>
+  <text x="700" y="780" font-size="10" fill="#333">Data Boundary</text>
+
+  <text x="500" y="815" text-anchor="middle" font-size="9" fill="#888">Technology Stack: Node.js | Express | bcrypt | JWT | Helmet | Winston | express-validator | HTTPS/TLS</text>
+</svg>
