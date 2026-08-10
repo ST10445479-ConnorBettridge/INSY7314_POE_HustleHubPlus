@@ -418,6 +418,12 @@ cd backend
 # Install dependencies
 npm install
 
+# Create your environment file (it is NOT committed, for security)
+cp .env.example .env        # PowerShell: Copy-Item .env.example .env
+
+# Generate a strong JWT_SECRET and paste it into .env
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
 # Generate SSL certificate
 node scripts/generate-cert.js
 
@@ -429,6 +435,8 @@ npm run dev
 ```
 
 The server will start on `https://localhost:3443`.
+
+> **Note**: the server refuses to start if `JWT_SECRET` is missing or shorter than 32 characters — set it in `.env`.
 
 ### Testing with Postman
 
