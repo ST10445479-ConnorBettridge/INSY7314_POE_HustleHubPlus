@@ -180,7 +180,7 @@ A native Android client (Kotlin) located in the `android/` folder. It implements
 android/
 ├── settings.gradle.kts / build.gradle.kts / gradle.properties
 ├── app/
-│   ├── build.gradle.kts           # AGP 8.5.2, Kotlin 1.9.24, minSdk 26
+│   ├── build.gradle.kts           # AGP 8.1.2, Kotlin 1.9.24, minSdk 26
 │   └── src/main/
 │       ├── AndroidManifest.xml    # network security config, INTERNET permission
 │       ├── res/
@@ -202,7 +202,7 @@ android/
 ### Running the App
 
 1. Start the backend first (see [Setup Instructions](#setup-instructions)).
-2. Open the `android/` folder in **Android Studio** (Iguana or newer).
+2. Open the `android/` folder in **Android Studio** (Giraffe 2022.3.1 or newer).
 3. Create/start an emulator (API 26–34) — the app connects to the host machine via `https://10.0.2.2:3443/`.
 4. Run the `app` configuration. Build output APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
@@ -407,7 +407,7 @@ All of the above are covered by automated tests in `backend/tests/security.test.
 
 - Node.js v18 or higher
 - npm
-- Android Studio (Iguana or newer) — for the Android app
+- Android Studio Giraffe (2022.3.1) or newer — for the Android app
 
 ### Installation
 
