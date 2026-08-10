@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.HustleHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/hustlehub_primary</item>
+        <item name="colorPrimaryVariant">@color/hustlehub_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/hustlehub_secondary</item>
+        <item name="colorSecondaryVariant">@color/hustlehub_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor">@color/hustlehub_dark</item>
+        <item name="android:navigationBarColor">@color/hustlehub_dark</item>
+        <item name="android:windowBackground">@color/hustlehub_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

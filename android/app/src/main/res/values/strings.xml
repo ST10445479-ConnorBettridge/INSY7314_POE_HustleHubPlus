@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HustleHub+</string>
+    <string name="tagline">Freelance Marketplace</string>
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Sign in to access your account</string>
+    <string name="email_hint">Email address</string>
+    <string name="password_hint">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="no_account">Don\'t have an account?</string>
+    <string name="have_account">Already have an account?</string>
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Join HustleHub+ today</string>
+    <string name="name_hint">Full name</string>
+    <string name="confirm_password_hint">Confirm password</string>
+    <string name="role_hint">I am a...</string>
+    <string name="role_freelancer">Freelancer</string>
+    <string name="role_client">Client</string>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="logout">Logout</string>
+    <string name="profile_label">Profile</string>
+    <string name="auth_token_label">JWT Token</string>
+    <string name="copy_token">Copy Token</string>
+    <string name="refresh">Refresh</string>
+    <string name="welcome_back">Welcome back, %1$s!</string>
+    <string name="no_token">No token</string>
+    <string name="connection_status">Server: Connected</string>
+    <string name="connection_error">Server: Unreachable</string>
+</resources>
