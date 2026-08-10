@@ -1,0 +1,30 @@
+# --- Node.js ---
+node_modules/
+
+# --- Secrets (never commit) ---
+.env
+
+# --- TLS certificates (private key must never be committed) ---
+certs/
+
+# --- Logs ---
+logs/
+*.log
+
+# --- Android Studio / Gradle ---
+.idea/
+.gradle/
+build/
+*.iml
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Playwright MCP artifacts ---
+.playwright-mcp/
