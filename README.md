@@ -2,6 +2,13 @@
 
 A secure freelance marketplace platform backend built with Node.js and Express.
 
+## Submission Artefacts
+
+- **Demonstration video**: <add link to your demo video here — still being made>
+- **Postman collection**: [`HustleHub+ Postman Collection.json`](HustleHub%2B%20Postman%20Collection.json)
+- **Architecture diagram**: [`architecture-diagram.svg`](architecture-diagram.svg)
+- **API response screenshots**: [`docs/screenshots/`](docs/screenshots/)
+
 ## Table of Contents
 
 1. [System Overview](#system-overview)
@@ -23,11 +30,11 @@ A secure freelance marketplace platform backend built with Node.js and Express.
 
 HustleHub+ is a freelance marketplace platform that connects freelancers offering services with clients seeking to book those services. The platform processes financial transactions and provides income tracking with estimated tax calculations.
 
-The system follows the **MERN architecture** (MongoDB, Express, React, Node.js), though at this foundational stage, data is stored in-memory (to be replaced with MongoDB in a later phase). The client is currently an **Android app** (Kotlin) that consumes the API over HTTPS.
+The system follows the **MERN architecture** (MongoDB, Express, React, Node.js). Part 1 delivers the Express/Node API layer with in-memory persistence (to be replaced with MongoDB in a later phase). A native **Android app (Kotlin)** was additionally implemented to consume the API over HTTPS, ahead of the **React web frontend** planned for Part 2.
 
 ### Core Features (Current Phase)
 - Secure user registration and authentication
-- Role-based user accounts (Client, Freelancer, Admin)
+- Role-based user accounts (Client, Freelancer; Admin role reserved for platform management)
 - JWT-based protected API routes
 - HTTPS-secured communications
 - Input validation and sanitisation
@@ -49,62 +56,15 @@ The platform supports three user roles:
 
 ## Architecture
 
-The system follows the **MERN (MongoDB, Express, React, Node.js)** architecture:
+The MERN stack defines the server-side and browser-side architecture: **MongoDB** (Part 2), **Express**, **React** (Part 2), **Node.js**. Part 1 delivers the Express/Node layer with in-memory persistence, as permitted by the brief. A native **Android client** was additionally implemented in Part 1 to demonstrate the API being consumed over TLS by a real client ahead of the React frontend.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    CLIENT (Android app - Kotlin)                  │
-│  (Retrofit + OkHttp, HTTPS with pinned self-signed certificate)   │
-└──────────────────────────┬───────────────────────────────────────┘
-                           │ HTTPS (TLS 1.3)
-                           ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    EXPRESS API SERVER (Node.js)                   │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────┐  │
-│  │ Auth Routes  │  │ Gig Routes  │  │ Transaction Routes       │  │
-│  │ (Part 1)     │  │ (Part 2)    │  │ (Part 2)                 │  │
-│  └──────┬───────┘  └──────┬──────┘  └──────────┬───────────────┘  │
-│         │                 │                     │                  │
-│         └────────┬────────┴──────────┬──────────┘                  │
-│                  ▼                    ▼                            │
-│         ┌────────────────┐  ┌──────────────────┐                  │
-│         │ Auth Middleware │  │ Validation MW     │                  │
-│         │ (JWT Verify)   │  │ (express-validator)│                 │
-│         └────────────────┘  └──────────────────┘                  │
-│                  │                    │                            │
-│                  ▼                    ▼                            │
-│         ┌────────────────┐  ┌──────────────────┐                  │
-│         │ Error Handler  │  │ Logger (Winston)  │                  │
-│         └────────────────┘  └──────────────────┘                  │
-│                  │                    │                            │
-│                  ▼                    ▼                            │
-│         ┌─────────────────────────────────────┐                   │
-│         │         SECURITY LAYER              │                   │
-│         │  ┌──────┐ ┌──────┐ ┌───────────┐   │                   │
-│         │  │Helmet │ │Rate  │ │HTTPS (SSL)│   │                   │
-│         │  │       │ │Limit │ │           │   │                   │
-│         │  └───────┘ └──────┘ └───────────┘   │                   │
-│         └─────────────────────────────────────┘                   │
-└──────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                      DATA STORES                                 │
-│  ┌─────────────────────┐  ┌──────────────────────────────────┐   │
-│  │  In-Memory Storage  │  │  File-based Logs (Winston)       │   │
-│  │  (Part 1 - Phase 1) │  │  error.log / combined.log        │   │
-│  └─────────────────────┘  └──────────────────────────────────┘   │
-│  ┌─────────────────────┐                                         │
-│  │  MongoDB (Phase 2)  │                                         │
-│  └─────────────────────┘                                         │
-└──────────────────────────────────────────────────────────────────┘
-```
+![HustleHub+ Architecture Diagram](architecture-diagram.svg)
 
 ### Diagram Description
 
 The architecture consists of three main layers:
 
-1. **Client Layer**: An Android app (Kotlin) built with Retrofit and OkHttp communicates with the API over HTTPS. The app pins the backend's self-signed certificate and connects to the backend at `https://10.0.2.2:3443/` from the Android emulator.
+1. **Client Layer**: Two clients consume the API over the same HTTPS boundary — the **React web frontend** (planned for Part 2, sharing the same API) and the **Android app (Kotlin)** implemented in this part. The Android app is built with Retrofit and OkHttp and pins the backend's self-signed certificate, connecting to the backend at `https://10.0.2.2:3443/` from the Android emulator.
 
 2. **API Layer**: The Express.js server sits at the core, routing requests through middleware pipelines:
    - **Security Middleware**: Helmet (HTTP headers), Rate Limiting, HTTPS enforcement
