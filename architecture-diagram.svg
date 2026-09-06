@@ -33,14 +33,21 @@
   <line x1="100" y1="50" x2="900" y2="50" stroke="#ddd" stroke-width="1"/>
 
   <!-- ====== CLIENT LAYER ====== -->
-  <rect x="300" y="70" width="400" height="90" rx="8" fill="url(#clientGrad)" opacity="0.95"/>
-  <text x="500" y="100" text-anchor="middle" font-size="16" font-weight="bold" fill="white">CLIENT LAYER</text>
-  <text x="500" y="120" text-anchor="middle" font-size="12" fill="white" opacity="0.9">React Frontend (Future Implementation)</text>
-  <text x="500" y="140" text-anchor="middle" font-size="11" fill="white" opacity="0.8">HTTPS Requests / JWT Token Storage</text>
+  <rect x="150" y="70" width="700" height="95" rx="8" fill="url(#clientGrad)" opacity="0.95"/>
+  <text x="500" y="92" text-anchor="middle" font-size="16" font-weight="bold" fill="white">CLIENT LAYER</text>
 
-  <!-- Arrow from Client to Server -->
-  <line x1="500" y1="160" x2="500" y2="225" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="515" y="195" font-size="10" fill="#666">HTTPS (TLS 1.3)</text>
+  <rect x="180" y="102" width="300" height="52" rx="6" fill="white" opacity="0.25"/>
+  <text x="330" y="123" text-anchor="middle" font-size="12" font-weight="bold" fill="white">React Web Frontend</text>
+  <text x="330" y="142" text-anchor="middle" font-size="10" fill="white" opacity="0.9">Part 2 - planned, same API</text>
+
+  <rect x="520" y="102" width="300" height="52" rx="6" fill="white" opacity="0.25"/>
+  <text x="670" y="123" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Android Client (Kotlin)</text>
+  <text x="670" y="142" text-anchor="middle" font-size="10" fill="white" opacity="0.9">Part 1 - implemented</text>
+
+  <!-- Arrows from both clients to the same HTTPS boundary -->
+  <line x1="330" y1="165" x2="330" y2="230" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="670" y1="165" x2="670" y2="230" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="500" y="205" text-anchor="middle" font-size="10" fill="#666">HTTPS (TLS 1.3)</text>
 
   <!-- ====== SYSTEM BOUNDARY ====== -->
   <rect x="50" y="230" width="900" height="480" rx="12" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-dasharray="8,4"/>
