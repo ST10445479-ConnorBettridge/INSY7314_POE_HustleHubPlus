@@ -11,6 +11,7 @@ A secure freelance marketplace platform backend built with Node.js and Express.
 
 ## Table of Contents
 
+0. [Submission Artefacts](#submission-artefacts)
 1. [System Overview](#system-overview)
 2. [Intended Users](#intended-users)
 3. [Architecture](#architecture)
@@ -23,6 +24,7 @@ A secure freelance marketplace platform backend built with Node.js and Express.
    - [HTTPS Configuration](#https-configuration)
    - [Additional Security Measures](#additional-security-measures)
 7. [Setup Instructions](#setup-instructions)
+8. [Screenshots of API Responses](#screenshots-of-api-responses)
 
 ---
 
@@ -285,7 +287,7 @@ Passwords are hashed **before** storage. The plain-text password is never retain
 - **Name**: Required, trimmed, max 100 characters, HTML-escaped
 - **Email**: Required, valid email format, normalised (lowercased)
 - **Password**: Minimum 8 characters, must contain uppercase, lowercase, number, and special character
-- **Role**: Must be one of: `client`, `freelancer`, `admin`
+- **Role**: Must be one of: `client` or `freelancer`. The `admin` role cannot be self-assigned through any API endpoint (see [Privilege Escalation](#hardening-against-common-attacks)).
 
 **Validation Rules - Login**:
 - **Email**: Required, valid email format
@@ -404,6 +406,36 @@ The server will start on `https://localhost:3443`.
 2. Set the `baseUrl` variable to `https://localhost:3443`
 3. Disable SSL certificate verification in Postman settings (Settings > General > SSL certificate verification: OFF)
 4. Test endpoints in order: Health → Register → Login → Profile
+5. The `Profile - Expired Token` request contains a token signed with the development `JWT_SECRET`; if you regenerate your secret, mint a fresh one with:
+
+   ```bash
+   node -e "require('dotenv').config(); console.log(require('jsonwebtoken').sign({id:1,email:'expired@example.com',role:'client',name:'Expired User'}, process.env.JWT_SECRET, {expiresIn:'-60s', issuer:'hustlehub-plus', audience:'hustlehub-plus-api'}))"
+   ```
+
+---
+
+## Screenshots of API Responses
+
+All screenshots below were captured from Postman and stored in `docs/screenshots/`. Each frame includes the request name, the status code, and the response time.
+
+| # | Request | Expected Status | Screenshot |
+|---|---------|-----------------|------------|
+| 1 | GET `/api/health` | 200 | `docs/screenshots/01_health.png` |
+| 2 | POST `/api/auth/register` — Freelancer success | 201 | `docs/screenshots/02_register_success.png` |
+| 3 | POST `/api/auth/register` — Client success | 201 | `docs/screenshots/03_register_client.png` |
+| 4 | POST `/api/auth/register` — Duplicate email | 409 | `docs/screenshots/04_register_duplicate.png` |
+| 5 | POST `/api/auth/register` — Validation errors | 400 | `docs/screenshots/05_register_validation.png` |
+| 6 | POST `/api/auth/register` — Admin role rejected | 400 | `docs/screenshots/06_register_admin_rejected.png` |
+| 7 | POST `/api/auth/login` — Success with JWT | 200 | `docs/screenshots/07_login_success.png` |
+| 8 | POST `/api/auth/login` — Wrong password | 401 | `docs/screenshots/08_login_wrong_password.png` |
+| 9 | POST `/api/auth/login` — Non-existent user | 401 | `docs/screenshots/09_login_no_user.png` |
+| 10 | POST `/api/auth/login` — Malformed JSON | 400 | `docs/screenshots/10_login_malformed_json.png` |
+| 11 | POST `/api/auth/login` — Oversized body | 413 | `docs/screenshots/11_login_oversized.png` |
+| 12 | GET `/api/auth/profile` — Valid token | 200 | `docs/screenshots/12_profile_success.png` |
+| 13 | GET `/api/auth/profile` — No token | 401 | `docs/screenshots/13_profile_no_token.png` |
+| 14 | GET `/api/auth/profile` — Invalid token | 401 | `docs/screenshots/14_profile_invalid_token.png` |
+| 15 | GET `/api/auth/profile` — Expired token | 401 | `docs/screenshots/15_profile_expired_token.png` |
+| 16 | GET `/api/unknown/route` — Not found | 404 | `docs/screenshots/16_404_unknown_route.png` |
 
 ### Running Tests
 
