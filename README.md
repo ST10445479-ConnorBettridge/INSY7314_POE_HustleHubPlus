@@ -422,26 +422,33 @@ The server will start on `https://localhost:3443`.
 
 ## Screenshots of API Responses
 
-All screenshots below were captured from Postman and stored in `docs/screenshots/`. Each frame includes the request name, the status code, and the response time.
+Captured against the live HTTPS API at `https://localhost:3443` and stored in
+`docs/screenshots/`. Each frame shows the request that was sent, the JSON
+response, and the HTTP status code.
 
-| # | Request | Expected Status | Screenshot |
-|---|---------|-----------------|------------|
-| 1 | GET `/api/health` | 200 | `docs/screenshots/01_health.png` |
-| 2 | POST `/api/auth/register` — Freelancer success | 201 | `docs/screenshots/02_register_success.png` |
-| 3 | POST `/api/auth/register` — Client success | 201 | `docs/screenshots/03_register_client.png` |
-| 4 | POST `/api/auth/register` — Duplicate email | 409 | `docs/screenshots/04_register_duplicate.png` |
-| 5 | POST `/api/auth/register` — Validation errors | 400 | `docs/screenshots/05_register_validation.png` |
-| 6 | POST `/api/auth/register` — Admin role rejected | 400 | `docs/screenshots/06_register_admin_rejected.png` |
-| 7 | POST `/api/auth/login` — Success with JWT | 200 | `docs/screenshots/07_login_success.png` |
-| 8 | POST `/api/auth/login` — Wrong password | 401 | `docs/screenshots/08_login_wrong_password.png` |
-| 9 | POST `/api/auth/login` — Non-existent user | 401 | `docs/screenshots/09_login_no_user.png` |
-| 10 | POST `/api/auth/login` — Malformed JSON | 400 | `docs/screenshots/10_login_malformed_json.png` |
-| 11 | POST `/api/auth/login` — Oversized body | 413 | `docs/screenshots/11_login_oversized.png` |
-| 12 | GET `/api/auth/profile` — Valid token | 200 | `docs/screenshots/12_profile_success.png` |
-| 13 | GET `/api/auth/profile` — No token | 401 | `docs/screenshots/13_profile_no_token.png` |
-| 14 | GET `/api/auth/profile` — Invalid token | 401 | `docs/screenshots/14_profile_invalid_token.png` |
-| 15 | GET `/api/auth/profile` — Expired token | 401 | `docs/screenshots/15_profile_expired_token.png` |
-| 16 | GET `/api/unknown/route` — Not found | 404 | `docs/screenshots/16_404_unknown_route.png` |
+### 1. Registration — [`01_registration_responses.png`](docs/screenshots/01_registration_responses.png)
+
+| Request | Status |
+|---------|--------|
+| GET `/api/health` | 200 |
+| POST `/api/auth/register` — freelancer created | 201 |
+| POST `/api/auth/register` — duplicate email | 409 |
+| POST `/api/auth/register` — validation errors | 400 |
+| POST `/api/auth/login` — success with JWT | 200 |
+
+### 2. Protected routes and error handling — [`02_protected_routes_and_errors.png`](docs/screenshots/02_protected_routes_and_errors.png)
+
+| Request | Status |
+|---------|--------|
+| GET `/api/auth/profile` — valid Bearer token | 200 |
+| GET `/api/auth/profile` — no token | 401 |
+| GET `/api/unknown/route` — unknown route | 404 |
+| POST `/api/auth/register` — admin role rejected | 400 |
+| POST `/api/auth/login` — malformed JSON | 400 |
+
+The register-validation response lists every failed rule in one body, and the
+admin-role rejection shows that `role` is a whitelist rather than free text, so
+an account cannot grant itself administrative access at sign-up.
 
 ### Running Tests
 
