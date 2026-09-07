@@ -1,6 +1,5 @@
 package com.hustlehub.app
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.ArrayAdapter
@@ -31,8 +30,13 @@ class RegisterActivity : AppCompatActivity() {
 
         binding.btnRegister.setOnClickListener { handleRegister() }
         binding.tvGoLogin.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            // Register is normally opened from Login, so finishing returns to the
+            // instance already on the stack instead of stacking a second one.
+            if (isTaskRoot) {
+                startAsNewRoot(LoginActivity::class.java)
+            } else {
+                finish()
+            }
         }
     }
 
@@ -66,8 +70,7 @@ class RegisterActivity : AppCompatActivity() {
                 tokenManager.saveAuthData(response.data.token, gson.toJson(response.data.user))
                 showError(null)
                 Toast.makeText(this@RegisterActivity, "Account created!", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
-                finish()
+                startAsNewRoot(DashboardActivity::class.java)
             } catch (e: Exception) {
                 showError(ApiClient.parseErrorMessage(e))
             } finally {

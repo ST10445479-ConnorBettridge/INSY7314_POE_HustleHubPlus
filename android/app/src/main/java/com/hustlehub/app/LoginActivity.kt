@@ -51,8 +51,7 @@ class LoginActivity : AppCompatActivity() {
                 tokenManager.saveAuthData(response.data.token, gson.toJson(response.data.user))
                 showError(null)
                 Toast.makeText(this@LoginActivity, "Welcome, ${response.data.user.name}!", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
-                finish()
+                startAsNewRoot(DashboardActivity::class.java)
             } catch (e: Exception) {
                 showError(ApiClient.parseErrorMessage(e))
             } finally {
