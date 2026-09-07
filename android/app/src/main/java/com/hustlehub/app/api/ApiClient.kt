@@ -25,9 +25,10 @@ object ApiClient {
     private val gson: Gson = GsonBuilder().create()
 
     private fun buildTrustManager(): Pair<javax.net.ssl.SSLSocketFactory, X509TrustManager> {
-        val certStream = HustleHubApplication.appContext.resources.openRawResource(R.raw.server_cert)
         val cf = CertificateFactory.getInstance("X.509")
-        val cert = cf.generateCertificate(certStream) as X509Certificate
+        val cert = HustleHubApplication.appContext.resources
+            .openRawResource(R.raw.server_cert)
+            .use { cf.generateCertificate(it) as X509Certificate }
 
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
         keyStore.load(null, null)
