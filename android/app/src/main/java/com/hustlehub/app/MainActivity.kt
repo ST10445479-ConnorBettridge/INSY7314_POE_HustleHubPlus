@@ -9,6 +9,23 @@ import com.hustlehub.app.security.TokenManager
 class MainActivity : AppCompatActivity() {
 
     private lateinit var tokenManager: TokenManager
+    private val handler = Handler(Looper.getMainLooper())
+
+    // Held so it can be cancelled: a posted callback keeps a reference to the
+    // activity, and firing after onDestroy would start a screen from a dead
+    // context.
+    private val routeAfterSplash = Runnable {
+        if (isFinishing || isDestroyed) return@Runnable
+        if (tokenManager.isLoggedIn()) {
+            startAsNewRoot(DashboardActivity::class.java)
+        } else {
+            // Drop a token that is present but already past its exp claim, so
+            // the Dashboard is never shown on credentials the server will
+            // reject a moment later.
+            tokenManager.clear()
+            startAsNewRoot(LoginActivity::class.java)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,17 +33,12 @@ class MainActivity : AppCompatActivity() {
 
         tokenManager = TokenManager(this)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (tokenManager.isLoggedIn()) {
-                startAsNewRoot(DashboardActivity::class.java)
-            } else {
-                // Drop a token that is present but already past its exp claim, so
-                // the Dashboard is never shown on credentials the server will
-                // reject a moment later.
-                tokenManager.clear()
-                startAsNewRoot(LoginActivity::class.java)
-            }
-        }, SPLASH_DELAY_MS)
+        handler.postDelayed(routeAfterSplash, SPLASH_DELAY_MS)
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacks(routeAfterSplash)
+        super.onDestroy()
     }
 
     companion object {
