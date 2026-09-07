@@ -1,6 +1,7 @@
 package com.hustlehub.app.api
 
 import com.google.gson.Gson
+import androidx.annotation.VisibleForTesting
 import com.google.gson.GsonBuilder
 import com.hustlehub.app.HustleHubApplication
 import com.hustlehub.app.R
@@ -50,7 +51,7 @@ object ApiClient {
             .build()
     }
 
-    val apiService: ApiService by lazy {
+    private val defaultService: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
@@ -59,13 +60,31 @@ object ApiClient {
             .create(ApiService::class.java)
     }
 
+    @Volatile
+    private var serviceOverride: ApiService? = null
+
+    /** The live pinned-HTTPS service, unless a test has substituted a fake. */
+    val apiService: ApiService
+        get() = serviceOverride ?: defaultService
+
+    /**
+     * Test hook. Substitutes [service] for the real service so activity tests can
+     * exercise success, failure and expiry paths without a running backend.
+     * Pass null to restore the real one.
+     */
+    @VisibleForTesting
+    @JvmStatic
+    fun setApiServiceForTesting(service: ApiService?) {
+        serviceOverride = service
+    }
+
     fun parseErrorMessage(e: Throwable): String {
         return when (e) {
             is HttpException -> {
                 try {
                     val body = e.response()?.errorBody()?.string()
-                    val error = gson.fromJson(body, ErrorResponse::class.java)
-                    error.message ?: "Request failed (${e.code()})"
+                    val error: ErrorResponse? = gson.fromJson(body, ErrorResponse::class.java)
+                    error?.message ?: "Request failed (${e.code()})"
                 } catch (ex: Exception) {
                     "Request failed (${e.code()})"
                 }
