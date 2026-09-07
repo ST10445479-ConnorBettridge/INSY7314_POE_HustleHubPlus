@@ -140,9 +140,9 @@ A native Android client (Kotlin) located in the `android/` folder. It implements
 
 ```
 android/
-├── settings.gradle.kts / build.gradle.kts / gradle.properties
+├── settings.gradle / build.gradle / gradle.properties
 ├── app/
-│   ├── build.gradle.kts           # AGP 8.1.2, Kotlin 1.9.24, minSdk 26
+│   ├── build.gradle               # AGP 8.1.2, Kotlin 1.9.24, minSdk 26
 │   └── src/main/
 │       ├── AndroidManifest.xml    # network security config, INTERNET permission
 │       ├── res/
@@ -168,7 +168,7 @@ android/
 3. Create/start an emulator (API 26–34) — the app connects to the host machine via `https://10.0.2.2:3443/`.
 4. Run the `app` configuration. Build output APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-> **Note**: the pinned certificate must match the backend's `certs/cert.pem`. If you regenerate the backend certificate, copy the new `certs/cert.pem` over `android/app/src/main/res/raw/server_cert.pem` and rebuild the app.
+> **Note**: the pinned certificate must match the backend's `certs/cert.pem`. Both `backend/scripts/generate-cert.js` and `backend/scripts/extract-certs.js` regenerate the certificate **and automatically sync** it to `android/app/src/main/res/raw/server_cert.pem`, so the server and the Android client always stay in sync. Rebuild the app after regenerating.
 
 ---
 
