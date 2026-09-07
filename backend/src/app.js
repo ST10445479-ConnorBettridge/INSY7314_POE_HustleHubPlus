@@ -3,7 +3,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const authRoutes = require('./routes/auth');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
