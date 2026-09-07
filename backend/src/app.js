@@ -71,6 +71,24 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'HustleHub+ API is running' });
 });
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Welcome to the HustleHub+ API',
+    data: {
+      name: 'HustleHub+',
+      description: 'A secure freelance marketplace platform API',
+      baseUrl: '/api',
+      endpoints: {
+        health: 'GET /api/health',
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        profile: 'GET /api/auth/profile (Bearer token required)',
+      },
+    },
+  });
+});
+
 app.use('/api/auth', authRoutes);
 
 app.use(notFoundHandler);

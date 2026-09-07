@@ -159,6 +159,16 @@ describe('API - GET /api/health', () => {
   });
 });
 
+describe('API - GET / (root)', () => {
+  it('should return an API welcome payload instead of a 404', async () => {
+    const res = await request(app).get('/');
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('success');
+    expect(res.body.data.endpoints.login).toBe('POST /api/auth/login');
+  });
+});
+
 describe('API - 404 handling', () => {
   it('should return 404 for unknown routes', async () => {
     const res = await request(app).get('/api/unknown');
