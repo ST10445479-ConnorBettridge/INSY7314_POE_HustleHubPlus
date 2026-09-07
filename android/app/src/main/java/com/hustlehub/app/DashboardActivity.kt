@@ -3,7 +3,6 @@ package com.hustlehub.app
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,8 +30,7 @@ class DashboardActivity : AppCompatActivity() {
 
         binding.btnLogout.setOnClickListener {
             tokenManager.clear()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            startAsNewRoot(LoginActivity::class.java)
         }
 
         binding.btnCopyToken.setOnClickListener {
@@ -79,17 +77,19 @@ class DashboardActivity : AppCompatActivity() {
             return
         }
 
-        binding.tvConnection.text = getString(R.string.connection_status)
-        binding.tvConnection.setTextColor(resources.getColor(R.color.hustlehub_success, null))
+        // Only claim a connection once the request has actually succeeded. While
+        // it is in flight the status stays amber, so a server that is already down
+        // is never briefly reported as connected.
+        setConnectionState(R.string.connection_checking, R.color.hustlehub_warning)
 
         lifecycleScope.launch {
             try {
                 val response = ApiClient.apiService.profile("Bearer $token")
                 populateUser(response.data.user)
                 tokenManager.saveAuthData(token, gson.toJson(response.data.user))
+                setConnectionState(R.string.connection_status, R.color.hustlehub_success)
             } catch (e: Exception) {
-                binding.tvConnection.text = getString(R.string.connection_error)
-                binding.tvConnection.setTextColor(resources.getColor(R.color.hustlehub_danger, null))
+                setConnectionState(R.string.connection_error, R.color.hustlehub_danger)
                 if (e is retrofit2.HttpException && e.code() == 401) {
                     logoutExpired()
                 }
@@ -97,10 +97,14 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun setConnectionState(textRes: Int, colorRes: Int) {
+        binding.tvConnection.text = getString(textRes)
+        binding.tvConnection.setTextColor(resources.getColor(colorRes, null))
+    }
+
     private fun logoutExpired() {
         tokenManager.clear()
         Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_LONG).show()
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
+        startAsNewRoot(LoginActivity::class.java)
     }
 }

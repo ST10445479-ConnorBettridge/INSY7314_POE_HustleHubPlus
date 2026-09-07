@@ -25,6 +25,7 @@
     <string name="refresh">Refresh</string>
     <string name="welcome_back">Welcome back, %1$s!</string>
     <string name="no_token">No token</string>
+    <string name="connection_checking">Server: Checking...</string>
     <string name="connection_status">Server: Connected</string>
     <string name="connection_error">Server: Unreachable</string>
 </resources>
