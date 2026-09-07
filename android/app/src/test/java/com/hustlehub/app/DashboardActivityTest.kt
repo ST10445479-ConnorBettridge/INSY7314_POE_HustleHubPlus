@@ -83,7 +83,7 @@ class DashboardActivityTest {
         val activity = launch()
         settle()
 
-        assertEquals("Server: Checking...", connectionText(activity))
+        assertEquals(activity.getString(R.string.connection_checking), connectionText(activity))
 
         gate.complete(Unit)
         settle()

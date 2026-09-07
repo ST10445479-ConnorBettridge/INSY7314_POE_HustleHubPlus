@@ -66,6 +66,20 @@ class AuthNavigationTest {
     }
 
     @Test
+    fun `a destroyed splash does not route after its delay elapses`() {
+        tokenManager.saveAuthData(TestData.jwt(secondsFromNow = 3600), "{}")
+
+        val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
+        val activity = controller.get()
+        controller.destroy()
+        passSplashDelay()
+
+        // The posted callback used to survive onDestroy and start a screen from
+        // a dead activity.
+        assertNull(shadowOf(activity).nextStartedActivity)
+    }
+
+    @Test
     fun `splash sends a signed-out user to login`() {
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         passSplashDelay()

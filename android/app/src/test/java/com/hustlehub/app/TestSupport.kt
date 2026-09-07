@@ -92,6 +92,13 @@ object TestData {
     }
 
     fun serverDown(): ConnectException = ConnectException("Connection refused")
+
+    /** A 500 - the server answered, so it is reachable; the request failed. */
+    fun serverError(): HttpException {
+        val body = """{"status":"error","statusCode":500,"message":"Internal server error"}"""
+            .toResponseBody("application/json".toMediaType())
+        return HttpException(Response.error<Any>(500, body))
+    }
 }
 
 /**
