@@ -43,7 +43,7 @@ data class ProfileResponse(
 data class ErrorResponse(
     val status: String,
     val statusCode: Int,
-    val message: String
+    val message: String? = null
 )
 
 data class HealthResponse(
