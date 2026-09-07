@@ -14,9 +14,13 @@
     <string name="register_subtitle">Join HustleHub+ today</string>
     <string name="name_hint">Full name</string>
     <string name="confirm_password_hint">Confirm password</string>
-    <string name="role_hint">I am a...</string>
-    <string name="role_freelancer">Freelancer</string>
-    <string name="role_client">Client</string>
+    <string name="role_hint">I am a…</string>
+    <string-array name="roles">
+        <item>@string/role_client</item>
+        <item>@string/role_freelancer</item>
+    </string-array>
+    <string name="role_freelancer">freelancer</string>
+    <string name="role_client">client</string>
     <string name="dashboard_title">Dashboard</string>
     <string name="logout">Logout</string>
     <string name="profile_label">Profile</string>
@@ -52,4 +56,15 @@
     <string name="error_password_no_digit">Password must contain a number</string>
     <string name="error_password_no_special">Password must contain a special character</string>
     <string name="error_password_mismatch">Passwords do not match</string>
+
+    <!-- Dashboard labels -->
+    <string name="label_name">Name:</string>
+    <string name="label_email">Email:</string>
+    <string name="label_role">Role:</string>
+    <string name="label_user_id">User ID:</string>
+    <string name="security_status_title">Security Status</string>
+    <string name="security_connection">✓  Connection: HTTPS (TLS)</string>
+    <string name="security_authentication">✓  Authentication: JWT Bearer token</string>
+    <string name="security_token_storage">✓  Token storage: Encrypted</string>
+    <string name="security_passwords">✓  Passwords: bcrypt hashed (server)</string>
 </resources>

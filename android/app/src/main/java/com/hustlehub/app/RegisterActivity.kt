@@ -41,8 +41,13 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun setupRoleSpinner() {
-        val roles = arrayOf("client", "freelancer")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, roles)
+        // The labels come from resources; the wire values the API accepts are
+        // the lower-case role names, so the position is mapped back on submit.
+        val adapter = ArrayAdapter.createFromResource(
+            this,
+            R.array.roles,
+            android.R.layout.simple_spinner_dropdown_item
+        )
         binding.spinnerRole.adapter = adapter
     }
 
@@ -51,7 +56,10 @@ class RegisterActivity : AppCompatActivity() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString()
         val confirm = binding.etConfirmPassword.text.toString()
-        val role = binding.spinnerRole.selectedItem?.toString() ?: "client"
+        val role = when (binding.spinnerRole.selectedItemPosition) {
+            1 -> getString(R.string.role_freelancer)
+            else -> getString(R.string.role_client)
+        }
 
         val validationError = validateInput(name, email, password, confirm)
         if (validationError != null) {
