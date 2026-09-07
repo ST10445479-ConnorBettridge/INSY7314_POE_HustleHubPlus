@@ -1,6 +1,5 @@
 package com.hustlehub.app
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,13 +17,19 @@ class MainActivity : AppCompatActivity() {
         tokenManager = TokenManager(this)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            val destination = if (tokenManager.isLoggedIn()) {
-                Intent(this, DashboardActivity::class.java)
+            if (tokenManager.isLoggedIn()) {
+                startAsNewRoot(DashboardActivity::class.java)
             } else {
-                Intent(this, LoginActivity::class.java)
+                // Drop a token that is present but already past its exp claim, so
+                // the Dashboard is never shown on credentials the server will
+                // reject a moment later.
+                tokenManager.clear()
+                startAsNewRoot(LoginActivity::class.java)
             }
-            startActivity(destination)
-            finish()
-        }, 2000)
+        }, SPLASH_DELAY_MS)
+    }
+
+    companion object {
+        private const val SPLASH_DELAY_MS = 2000L
     }
 }
