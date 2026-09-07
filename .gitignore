@@ -28,3 +28,6 @@ desktop.ini
 
 # --- Playwright MCP artifacts ---
 .playwright-mcp/
+
+# The report is committed as a PDF; the .docx is a build artefact of generate_report.py
+HustleHub+_Part1_Report.docx

@@ -1,5 +1,10 @@
 """Generates HustleHub+_Part1_Report.docx from the content below.
 
+The submitted artefact is HustleHub+_Part1_Report.pdf, exported from this
+document via Word so the table of contents resolves to real page numbers. The
+.docx is an intermediate and is git-ignored; edit this script rather than the
+document, then regenerate and re-export.
+
 Run:  python generate_report.py
 """
 

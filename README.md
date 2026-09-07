@@ -4,6 +4,7 @@ A secure freelance marketplace platform backend built with Node.js and Express.
 
 ## Submission Artefacts
 
+- **Part 1 report**: [`HustleHub+_Part1_Report.pdf`](HustleHub%2B_Part1_Report.pdf)
 - **Demonstration video**: <add link to your demo video here — still being made>
 - **Postman collection**: [`HustleHub+ Postman Collection.json`](HustleHub%2B%20Postman%20Collection.json)
 - **Architecture diagram**: [`architecture-diagram.svg`](architecture-diagram.svg)
@@ -118,8 +119,11 @@ backend/
 │   │   └── auth.js           # Authentication routes (register, login, profile)
 │   └── utils/
 │       └── logger.js         # Winston logger configuration
+├── jest.config.js            # Loads the test environment before the suites
 └── tests/
-    └── auth.test.js          # Jest unit tests for auth endpoints
+    ├── env.setup.js          # Test-only JWT_SECRET so a clean clone can run
+    ├── auth.test.js          # Endpoint tests
+    └── security.test.js      # Security regression tests
 ```
 
 ---
@@ -159,12 +163,14 @@ android/
 │           ├── api/               # Retrofit ApiClient + ApiService
 │           ├── model/             # request/response DTOs
 │           └── security/          # TokenManager (EncryptedSharedPreferences)
+└── app/src/test/                  # Robolectric unit tests (no device needed)
 ```
 
 ### Running the App
 
 1. Start the backend first (see [Setup Instructions](#setup-instructions)).
 2. Open the `android/` folder in **Android Studio** (Giraffe 2022.3.1 or newer).
+   Use a **JDK 17** toolchain — AGP 8.1.2 cannot build under JDK 21.
 3. Create/start an emulator (API 26–34) — the app connects to the host machine via `https://10.0.2.2:3443/`.
 4. Run the `app` configuration. Build output APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
@@ -439,6 +445,19 @@ All screenshots below were captured from Postman and stored in `docs/screenshots
 
 ### Running Tests
 
+Backend — 28 tests across two suites. No `.env` is required; `tests/env.setup.js`
+supplies a test-only secret, so this works on a fresh clone:
+
 ```bash
+cd backend
 npm test
+```
+
+Android — 37 Robolectric tests covering splash routing, login, registration,
+back-stack behaviour, the dashboard connection states, refresh guarding and the
+401 auto-logout. No emulator needed, but **JDK 17 is required**:
+
+```bash
+cd android
+./gradlew testDebugUnitTest
 ```
