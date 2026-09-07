@@ -5,6 +5,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.hustlehub.app.security.TokenManager
@@ -176,6 +177,48 @@ class AuthNavigationTest {
         // Back returned an authenticated user to it.
         assertClearsTask(shadowOf(activity).nextStartedActivity, DashboardActivity::class.java)
         assertTrue(tokenManager.isLoggedIn())
+    }
+
+    @Test
+    fun `the selected role is what gets sent to the API`() {
+        // The spinner is fed from a string-array and the wire value is derived
+        // from the selected position, so a reordered array would silently
+        // register everyone as the wrong role.
+        api.registerResult = { TestData.authResponse() }
+
+        val activity = Robolectric.buildActivity(RegisterActivity::class.java).setup().get()
+        val spinner = activity.findViewById<Spinner>(R.id.spinnerRole)
+        spinner.setSelection(1)
+
+        activity.findViewById<EditText>(R.id.etName).setText("Test User")
+        activity.findViewById<EditText>(R.id.etEmail).setText("free@example.com")
+        activity.findViewById<EditText>(R.id.etPassword).setText("SecurePass1!")
+        activity.findViewById<EditText>(R.id.etConfirmPassword).setText("SecurePass1!")
+        activity.findViewById<Button>(R.id.btnRegister).performClick()
+        settle()
+
+        val sent = api.lastRegister
+        assertEquals("freelancer", sent?.role)
+        // Guards the mix-up an external review claimed existed: the role field
+        // must carry the role, never the confirmation password.
+        assertEquals("SecurePass1!", sent?.password)
+        assertEquals("Test User", sent?.name)
+        assertEquals("free@example.com", sent?.email)
+    }
+
+    @Test
+    fun `the default role is client`() {
+        api.registerResult = { TestData.authResponse() }
+
+        val activity = Robolectric.buildActivity(RegisterActivity::class.java).setup().get()
+        activity.findViewById<EditText>(R.id.etName).setText("Test User")
+        activity.findViewById<EditText>(R.id.etEmail).setText("cli@example.com")
+        activity.findViewById<EditText>(R.id.etPassword).setText("SecurePass1!")
+        activity.findViewById<EditText>(R.id.etConfirmPassword).setText("SecurePass1!")
+        activity.findViewById<Button>(R.id.btnRegister).performClick()
+        settle()
+
+        assertEquals("client", api.lastRegister?.role)
     }
 
     @Test
