@@ -5,7 +5,7 @@ A secure freelance marketplace platform backend built with Node.js and Express.
 ## Submission Artefacts
 
 - **Part 1 report**: [`HustleHub+_Part1_Report.pdf`](HustleHub%2B_Part1_Report.pdf)
-- **Demonstration video**: <add link to your demo video here — still being made>
+- **Demonstration video**: [youtu.be/e93GCEHJpSw](https://youtu.be/e93GCEHJpSw)
 - **Postman collection**: [`HustleHub+ Postman Collection.json`](HustleHub%2B%20Postman%20Collection.json)
 - **Architecture diagram**: [`architecture-diagram.svg`](architecture-diagram.svg)
 - **API response screenshots**: [`docs/screenshots/`](docs/screenshots/)
