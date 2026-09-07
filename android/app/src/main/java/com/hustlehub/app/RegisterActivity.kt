@@ -60,7 +60,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         binding.btnRegister.isEnabled = false
-        binding.btnRegister.text = "Creating account..."
+        binding.btnRegister.text = getString(R.string.creating_account)
 
         lifecycleScope.launch {
             try {
@@ -69,13 +69,19 @@ class RegisterActivity : AppCompatActivity() {
                 )
                 tokenManager.saveAuthData(response.data.token, gson.toJson(response.data.user))
                 showError(null)
-                Toast.makeText(this@RegisterActivity, "Account created!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@RegisterActivity,
+                    getString(R.string.account_created),
+                    Toast.LENGTH_SHORT
+                ).show()
                 startAsNewRoot(DashboardActivity::class.java)
             } catch (e: Exception) {
                 showError(ApiClient.parseErrorMessage(e))
             } finally {
-                binding.btnRegister.isEnabled = true
-                binding.btnRegister.text = getString(R.string.sign_up)
+                if (!isFinishing && !isDestroyed) {
+                    binding.btnRegister.isEnabled = true
+                    binding.btnRegister.text = getString(R.string.sign_up)
+                }
             }
         }
     }
@@ -87,15 +93,17 @@ class RegisterActivity : AppCompatActivity() {
         confirm: String
     ): String? {
         return when {
-            TextUtils.isEmpty(name) -> "Full name is required"
-            TextUtils.isEmpty(email) -> "Email address is required"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Enter a valid email address"
-            password.length < 8 -> "Password must be at least 8 characters"
-            !password.any { it.isUpperCase() } -> "Password must contain an uppercase letter"
-            !password.any { it.isLowerCase() } -> "Password must contain a lowercase letter"
-            !password.any { it.isDigit() } -> "Password must contain a number"
-            !password.any { "!@#\$%^&*(),.?\":{}|<>".contains(it) } -> "Password must contain a special character"
-            password != confirm -> "Passwords do not match"
+            TextUtils.isEmpty(name) -> getString(R.string.error_name_required)
+            TextUtils.isEmpty(email) -> getString(R.string.error_email_required)
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                getString(R.string.error_email_invalid)
+            password.length < 8 -> getString(R.string.error_password_too_short)
+            !password.any { it.isUpperCase() } -> getString(R.string.error_password_no_uppercase)
+            !password.any { it.isLowerCase() } -> getString(R.string.error_password_no_lowercase)
+            !password.any { it.isDigit() } -> getString(R.string.error_password_no_digit)
+            !password.any { "!@#\$%^&*(),.?\":{}|<>".contains(it) } ->
+                getString(R.string.error_password_no_special)
+            password != confirm -> getString(R.string.error_password_mismatch)
             else -> null
         }
     }

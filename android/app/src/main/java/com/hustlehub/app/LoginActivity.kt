@@ -43,29 +43,38 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnLogin.isEnabled = false
-        binding.btnLogin.text = "Signing in..."
+        binding.btnLogin.text = getString(R.string.signing_in)
 
         lifecycleScope.launch {
             try {
                 val response = ApiClient.apiService.login(LoginRequest(email, password))
                 tokenManager.saveAuthData(response.data.token, gson.toJson(response.data.user))
                 showError(null)
-                Toast.makeText(this@LoginActivity, "Welcome, ${response.data.user.name}!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@LoginActivity,
+                    getString(R.string.welcome_user, response.data.user.name),
+                    Toast.LENGTH_SHORT
+                ).show()
                 startAsNewRoot(DashboardActivity::class.java)
             } catch (e: Exception) {
                 showError(ApiClient.parseErrorMessage(e))
             } finally {
-                binding.btnLogin.isEnabled = true
-                binding.btnLogin.text = getString(R.string.sign_in)
+                // The success path finishes this activity, so only touch the
+                // controls if the window is still alive.
+                if (!isFinishing && !isDestroyed) {
+                    binding.btnLogin.isEnabled = true
+                    binding.btnLogin.text = getString(R.string.sign_in)
+                }
             }
         }
     }
 
     private fun validateInput(email: String, password: String): String? {
         return when {
-            TextUtils.isEmpty(email) -> "Email address is required"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Enter a valid email address"
-            TextUtils.isEmpty(password) -> "Password is required"
+            TextUtils.isEmpty(email) -> getString(R.string.error_email_required)
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                getString(R.string.error_email_invalid)
+            TextUtils.isEmpty(password) -> getString(R.string.error_password_required)
             else -> null
         }
     }
