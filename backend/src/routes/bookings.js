@@ -45,7 +45,7 @@ router.post('/', authenticate, requireRole('client'), bookingValidation, async (
       return next(new AppError('You cannot book your own gig', 400));
     }
 
-    booking = await Booking.create({
+    const booking = await Booking.create({
       gig: gig._id,
       client: req.user.id,
       freelancer: gig.owner,
