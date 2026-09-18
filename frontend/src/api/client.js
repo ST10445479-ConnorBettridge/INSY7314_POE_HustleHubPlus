@@ -44,7 +44,14 @@ export const api = {
 
   getProfile: () => request('/auth/profile'),
 
-  listGigs: (category) => request(`/gigs${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+  listGigs: (opts = {}) => {
+    const { category = '', query = '' } = opts || {};
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (query && query.trim()) params.set('query', query.trim());
+    const qs = params.toString();
+    return request(`/gigs${qs ? `?${qs}` : ''}`);
+  },
   getGig: (id) => request(`/gigs/${id}`),
   createGig: (gig) => request('/gigs', { method: 'POST', body: gig }),
   updateGig: (id, gig) => request(`/gigs/${id}`, { method: 'PUT', body: gig }),

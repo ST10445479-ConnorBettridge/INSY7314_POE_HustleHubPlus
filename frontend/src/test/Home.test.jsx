@@ -84,7 +84,21 @@ describe('Home page', () => {
     await user.click(screen.getByRole('button', { name: 'Marketing' }));
 
     await waitFor(() => {
-      expect(api.listGigs).toHaveBeenCalledWith('Marketing');
+      expect(api.listGigs).toHaveBeenCalledWith({ category: 'Marketing', query: '' });
+    });
+  });
+
+  it('searches when the query is typed (debounced)', async () => {
+    api.listGigs.mockResolvedValue({ data: { gigs } });
+    const user = userEvent.setup();
+
+    renderWithProviders(<Home />, { route: '/' });
+    await screen.findByText('Logo Design');
+
+    await user.type(screen.getByPlaceholderText(/search by title/i), 'logo');
+
+    await waitFor(() => {
+      expect(api.listGigs).toHaveBeenLastCalledWith({ category: '', query: 'logo' });
     });
   });
 });
