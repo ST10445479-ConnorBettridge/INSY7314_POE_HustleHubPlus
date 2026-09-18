@@ -38,6 +38,14 @@ export default function FreelancerIncome() {
           <span className="stat-value">${income.totalIncome.toLocaleString()}</span>
         </div>
         <div className="card stat">
+          <span className="stat-label">Estimated tax ({(income.taxRate * 100).toFixed(1)}%)</span>
+          <span className="stat-value">${income.taxEstimate.toLocaleString()}</span>
+        </div>
+        <div className="card stat">
+          <span className="stat-label">Net income after tax</span>
+          <span className="stat-value">${income.netIncome.toLocaleString()}</span>
+        </div>
+        <div className="card stat">
           <span className="stat-label">Transactions</span>
           <span className="stat-value">{income.transactionCount}</span>
         </div>
