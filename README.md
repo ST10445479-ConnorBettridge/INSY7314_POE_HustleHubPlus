@@ -267,7 +267,7 @@ A Vite + React single-page app served by the backend itself (built `dist` mounte
 | `/gigs/:id` | Gig detail + book | Public (book = client) |
 | `/dashboard` | Client dashboard — my bookings | Client |
 | `/dashboard/freelancer` | Freelancer dashboard — my gigs | Freelancer |
-| `/dashboard/gigs/new`, `/dashboard/gigs/:id/edit` | Gig form | Freelancer |
+| `/dashboard/new-gig`, `/dashboard/edit-gig/:id` | Gig form | Freelancer |
 | `/dashboard/income` | Income + estimated tax | Freelancer |
 | `*` | 404 Not Found | – |
 
@@ -407,3 +407,4 @@ All web UI and API screenshots live in [`docs/screenshots/`](docs/screenshots/) 
 | 7 | Gig form (create/edit) | `web_07_gig_form.png` |
 | 8 | Income + estimated tax | `web_08_income.png` |
 | 9 | 404 Not Found | `web_09_404.png` |
+| 10 | Home — live search results | `web_10_search.png` |

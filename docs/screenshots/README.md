@@ -12,9 +12,10 @@ Screenshots captured from the live application (Edge, 1280×900) via the DevTool
 | 4 | Gig detail (public view) | `/gigs/:id` | `web_04_gig_detail.png` |
 | 5 | Client dashboard — my bookings (`alex@hustlehub.demo`) | `/dashboard` | `web_05_client_dashboard.png` |
 | 6 | Freelancer dashboard — my gigs (`zane@hustlehub.demo`) | `/dashboard/freelancer` | `web_06_freelancer_dashboard.png` |
-| 7 | Gig form (create) | `/dashboard/gigs/new` | `web_07_gig_form.png` |
+| 7 | Gig form (create) | `/dashboard/new-gig` | `web_07_gig_form.png` |
 | 8 | Income + estimated tax | `/dashboard/income` | `web_08_income.png` |
 | 9 | 404 Not Found | `/does-not-exist` | `web_09_404.png` |
+| 10 | Home — live search results | `/` (query "seo") | `web_10_search.png` |
 
 ## API responses (Part 1, Postman)
 
