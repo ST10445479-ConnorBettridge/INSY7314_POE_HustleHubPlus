@@ -82,12 +82,15 @@ userSchema.statics.authenticate = async function authenticate(email, password) {
 
 userSchema.statics.createUser = async function createUser({ name, email, password, role }) {
   try {
+    const exists = await this.findOne({ email }).select('_id');
+    if (exists) return null; // duplicate email
+
     const user = await this.create({ name, email, password, role });
     logger.info('User created', { userId: user._id.toString(), role: user.role });
     return user.toSafeObject();
   } catch (err) {
     if (err && err.code === 11000) {
-      return null; // duplicate email
+      return null; // duplicate email (unique index backstop)
     }
     throw err;
   }

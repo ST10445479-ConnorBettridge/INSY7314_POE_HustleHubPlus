@@ -35,9 +35,15 @@ describe('Auth API - POST /api/auth/register', () => {
   });
 
   it('should reject duplicate email registration', async () => {
+    const email = `duplicate-${Date.now()}@example.com`;
+
+    await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'First', email, password: 'TestPass1!', role: 'client' });
+
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Duplicate', email: 'test@example.com', password: 'TestPass1!', role: 'freelancer' });
+      .send({ name: 'Second', email, password: 'TestPass1!', role: 'client' });
 
     expect(res.status).toBe(409);
     expect(res.body.message).toContain('already exists');
@@ -170,8 +176,15 @@ describe('API - GET /api/health', () => {
 });
 
 describe('API - GET / (root)', () => {
-  it('should return an API welcome payload instead of a 404', async () => {
+  it('should serve the app root without a 404 (SPA or API welcome)', async () => {
     const res = await request(app).get('/');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/html|application\/json/);
+  });
+
+  it('should expose the API welcome payload at /api', async () => {
+    const res = await request(app).get('/api');
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('success');
