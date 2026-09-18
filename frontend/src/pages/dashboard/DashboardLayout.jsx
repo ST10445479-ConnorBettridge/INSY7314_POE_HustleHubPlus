@@ -1,4 +1,4 @@
-import { NavLink, Navigate, Outlet } from 'react-router-dom';
+import { NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export function DashboardHome() {
@@ -7,7 +7,13 @@ export function DashboardHome() {
 }
 
 export default function DashboardLayout() {
-  const { role, user } = useAuth();
+  const { role, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   if (role === 'admin') {
     return <Navigate to="/" replace />;
@@ -33,9 +39,14 @@ export default function DashboardLayout() {
             Signed in as {user.name} ({role})
           </p>
         </div>
-        <NavLink to="/" className="btn btn-outline btn-sm">
-          Browse gigs
-        </NavLink>
+        <div className="dashboard-actions">
+          <NavLink to="/" className="btn btn-outline btn-sm">
+            Browse gigs
+          </NavLink>
+          <button type="button" className="btn btn-outline btn-sm" onClick={handleLogout}>
+            Log out
+          </button>
+        </div>
       </div>
 
       <nav className="tabs">
