@@ -1,0 +1,1 @@
+{"private":true,"scripts":{"seed":"npm --prefix backend run seed","start":"npm --prefix backend start","dev":"npm --prefix backend run dev","e2e:smoke":"npm --prefix backend run e2e:smoke"}}

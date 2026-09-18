@@ -20,12 +20,57 @@ const DEMO_PASS = 'DemoPass1!';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function findPageWs() {
-  const res = await fetch(`http://127.0.0.1:${PORT}/json`);
+async function closeStrayTabs() {
+  const res = await fetch(`http://127.0.0.1:${PORT}/json/list`);
   const targets = await res.json();
-  const page = targets.find((t) => t.type === 'page' && !t.url.startsWith('edge://'));
-  if (!page) throw new Error('No page target found on CDP port ' + PORT);
-  return page.webSocketDebuggerUrl;
+  const baseOrigin = new URL(BASE).origin;
+
+  for (const target of targets) {
+    if (target.type !== 'page') continue;
+
+    const url = target.url || '';
+    const isHustleHub =
+      url === 'about:blank' ||
+      url.startsWith(baseOrigin);
+
+    if (isHustleHub) continue;
+
+    try {
+      await fetch(`http://127.0.0.1:${PORT}/json/close/${target.id}`);
+      console.log('closed stray tab:', url);
+    } catch (err) {
+      console.warn('could not close stray tab:', url, err.message);
+    }
+  }
+}
+
+async function findPageWs() {
+  await closeStrayTabs();
+
+  const res = await fetch(`http://127.0.0.1:${PORT}/json/list`);
+  const targets = await res.json();
+  const baseOrigin = new URL(BASE).origin;
+
+  const page = targets.find(
+    (t) =>
+      t.type === 'page' &&
+      (t.url || '').startsWith(baseOrigin)
+  );
+
+  const blank = targets.find(
+    (t) => t.type === 'page' && (t.url || '') === 'about:blank'
+  );
+
+  const selected = page || blank;
+
+  if (!selected) {
+    throw new Error(
+      'No HustleHub page target found on CDP port ' + PORT
+    );
+  }
+
+  console.log('using browser target:', selected.url);
+  return selected.webSocketDebuggerUrl;
 }
 
 function connect(url) {
@@ -159,24 +204,7 @@ async function login(ws, email) {
     await navigate(ws, BASE + '/does-not-exist');
     await capture(ws, 'web_09_404.png');
 
-    await navigate(ws, BASE + '/');
-    const alex = await login(ws, 'alex@hustlehub.demo');
-    if (alex !== 'ok') throw new Error('alex login: ' + alex);
-    await navigate(ws, BASE + '/dashboard');
-    await capture(ws, 'web_05_client_dashboard.png');
-
-    await navigate(ws, BASE + '/');
-    const zane = await login(ws, 'zane@hustlehub.demo');
-    if (zane !== 'ok') throw new Error('zane login: ' + zane);
-    await navigate(ws, BASE + '/dashboard/freelancer');
-    await capture(ws, 'web_06_freelancer_dashboard.png');
-
-    await navigate(ws, BASE + '/dashboard/new-gig');
-    await capture(ws, 'web_07_gig_form.png');
-
-    await navigate(ws, BASE + '/dashboard/income');
-    await capture(ws, 'web_08_income.png');
-
+    // Home with an active search query (feature added with the QA pass)
     await navigate(ws, BASE + '/');
     await evalJs(ws, `(() => {
       const input = document.querySelector('.search-box input');
@@ -189,6 +217,59 @@ async function login(ws, email) {
     })()`);
     await sleep(1400);
     await capture(ws, 'web_10_search.png');
+
+    // Client flow: dashboard, then book a gig -> inline confirmation
+    await navigate(ws, BASE + '/');
+    const alex = await login(ws, 'alex@hustlehub.demo');
+    if (alex !== 'ok') throw new Error('alex login: ' + alex);
+    await navigate(ws, BASE + '/dashboard');
+    await capture(ws, 'web_05_client_dashboard.png');
+
+    await navigate(ws, BASE + '/gigs/' + gigId);
+    await evalJs(ws, `(() => {
+      const ta = document.querySelector('textarea');
+      if (ta) {
+        Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Booking from the screenshot run');
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      return 'ok';
+    })()`);
+    await evalJs(ws, `(() => {
+      const btn = [...document.querySelectorAll('button')].find(b => b.textContent.includes('Book now'));
+      if (!btn) return 'NO_BOOK_BTN'; btn.click(); return 'ok';
+    })()`);
+    await sleep(1800);
+    await capture(ws, 'web_13_booking_confirmed.png');
+
+    // Freelancer flow: my gigs, create form, edit form, bookings, income
+    await navigate(ws, BASE + '/');
+    const zane = await login(ws, 'zane@hustlehub.demo');
+    if (zane !== 'ok') throw new Error('zane login: ' + zane);
+    await navigate(ws, BASE + '/dashboard/gigs');
+    await capture(ws, 'web_06_freelancer_dashboard.png');
+
+    await navigate(ws, BASE + '/dashboard/new-gig');
+    await capture(ws, 'web_07_gig_form.png');
+
+    const zaneGigId = await evalJs(ws, `(async () => {
+      const res = await fetch('${BASE}/api/gigs/mine', {
+        headers: { Authorization: 'Bearer ' + localStorage.getItem('hustlehub_token') },
+      });
+      const j = await res.json();
+      const mine = (j.data && j.data.gigs) || [];
+      return mine.length ? mine[0].id : null;
+    })()`);
+    if (zaneGigId) {
+      await navigate(ws, BASE + '/dashboard/edit-gig/' + zaneGigId);
+      await capture(ws, 'web_12_gig_form_edit.png');
+    }
+
+    await navigate(ws, BASE + '/dashboard/bookings');
+    await sleep(1200);
+    await capture(ws, 'web_11_freelancer_bookings.png');
+
+    await navigate(ws, BASE + '/dashboard/income');
+    await capture(ws, 'web_08_income.png');
 
     ws.close();
     console.log('DONE');
