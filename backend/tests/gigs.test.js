@@ -80,6 +80,19 @@ describe('Gig API - GET /api/gigs (browse)', () => {
     expect(res.body.data.gig.title).toBe('Content Writing');
   });
 
+  it('search query filters gigs by title/description (case-insensitive)', async () => {
+    const { token } = await registerUser({ name: 'Freelancer Search', email: 'flancer-search@example.com', role: 'freelancer' });
+    await createGig(token, { title: 'Brand Photography', category: 'Photography', price: 120 });
+    await createGig(token, { title: 'Video Editing', category: 'Video', price: 220 });
+
+    const res = await request(app).get('/api/gigs?query=photography');
+
+    expect(res.status).toBe(200);
+    const titles = res.body.data.gigs.map((g) => g.title);
+    expect(titles).toContain('Brand Photography');
+    expect(titles).not.toContain('Video Editing');
+  });
+
   it('returns 404 for a missing gig', async () => {
     const res = await request(app).get(`/api/gigs/${'a'.repeat(24)}`);
     expect(res.status).toBe(404);

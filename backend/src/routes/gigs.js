@@ -25,6 +25,16 @@ router.get('/', async (req, res, next) => {
     if (req.query.category && typeof req.query.category === 'string') {
       filter.category = req.query.category;
     }
+    if (req.query.query && typeof req.query.query === 'string') {
+      const q = req.query.query.trim();
+      if (q) {
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        filter.$or = [
+          { title: { $regex: escaped, $options: 'i' } },
+          { description: { $regex: escaped, $options: 'i' } },
+        ];
+      }
+    }
 
     const gigs = await Gig.find(filter).sort({ createdAt: -1 });
     const payload = await loadOwnerNames(gigs);
