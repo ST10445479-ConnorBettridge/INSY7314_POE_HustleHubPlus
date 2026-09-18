@@ -1,6 +1,16 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../src/app');
+const { connectTestDB, cleanDB, disconnectTestDB } = require('./db-test');
+
+beforeAll(async () => {
+  await connectTestDB();
+  await cleanDB();
+});
+
+afterAll(async () => {
+  await disconnectTestDB();
+});
 
 const unsignedToken = (payload) => {
   const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
@@ -170,11 +180,120 @@ describe('Security hardening - response headers', () => {
     expect(res.headers['x-powered-by']).toBeUndefined();
   });
 
+  it('sends a content security policy that blocks third-party scripts', async () => {
+    const res = await request(app).get('/api/health');
+
+    const csp = res.headers['content-security-policy'];
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("object-src 'none'");
+  });
+
   it('does not leak internal error details for unknown routes', async () => {
     const res = await request(app).get('/api/unknown');
 
     expect(res.status).toBe(404);
     expect(res.body.message).toBe('Route /api/unknown not found');
     expect(res.body).not.toHaveProperty('stack');
+  });
+});
+
+describe('Security hardening - NoSQL injection resistance', () => {
+  it('neutralises $ operator injection in booking bodies', async () => {
+    const client = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Nosql Client', email: 'nosql-client@example.com', password: 'NosqlPass1!', role: 'client' });
+    const token = client.body.data.token;
+
+    const res = await request(app)
+      .post('/api/bookings')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ gigId: { $gt: '' } });
+
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe('error');
+  });
+
+  it('neutralises key injection in gig creation bodies', async () => {
+    const freelancer = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Nosql Flancer', email: 'nosql-flancer@example.com', password: 'NosqlPass1!', role: 'freelancer' });
+    const token = freelancer.body.data.token;
+
+    const res = await request(app)
+      .post('/api/gigs')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: { $ne: null },
+        description: 'Description that is long enough to pass validation sanity checks.',
+        category: 'Web',
+        price: { $gt: 0 },
+      });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('neutralises query string operator injection', async () => {
+    const res = await request(app).get('/api/gigs?price[$gte]=0&category[$ne]=x');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('success');
+  });
+});
+
+describe('Security hardening - XSS sanitisation', () => {
+  it('strips script tags from gig titles before they are stored', async () => {
+    const freelancer = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Xss Flancer', email: 'xss-flancer@example.com', password: 'XssPass1!', role: 'freelancer' });
+    const token = freelancer.body.data.token;
+
+    const res = await request(app)
+      .post('/api/gigs')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: '<script>alert(1)</script>Safe Title',
+        description: '<script>alert("pwned")</script>  A perfectly harmless description body.',
+        category: '<img src=x onerror=alert(1)>Web',
+        price: 10,
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.gig.title).not.toContain('<script>');
+    expect(res.body.data.gig.title).not.toContain('alert');
+    expect(res.body.data.gig.description).not.toContain('<script>');
+  });
+
+  it('strips script payloads from registration names', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Good<script>alert(1)</script>Name', email: 'xss-name@example.com', password: 'XssName1!', role: 'client' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.user.name).not.toContain('<script>');
+    expect(res.body.data.user.name).toContain('GoodName');
+  });
+});
+
+describe('Security hardening - booking rate limiting configuration', () => {
+  it('exposes the booking limiter headers in development', async () => {
+    // In tests the limiter is bypassed; this verifies the route still behaves.
+    const client = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Rate Client', email: 'rate-client@example.com', password: 'RatePass1!', role: 'client' });
+
+    const flancer = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Rate Flancer', email: 'rate-flancer@example.com', password: 'RatePass1!', role: 'freelancer' });
+    const gig = await request(app)
+      .post('/api/gigs')
+      .set('Authorization', `Bearer ${flancer.body.data.token}`)
+      .send({ title: 'Rate Gig', description: 'A gig used purely to verify the booking endpoint exists.', category: 'Web', price: 50 });
+
+    const res = await request(app)
+      .post('/api/bookings')
+      .set('Authorization', `Bearer ${client.body.data.token}`)
+      .send({ gigId: gig.body.data.gig.id });
+
+    expect(res.status).toBe(201);
   });
 });

@@ -1,5 +1,15 @@
 const request = require('supertest');
 const app = require('../src/app');
+const { connectTestDB, cleanDB, disconnectTestDB } = require('./db-test');
+
+beforeAll(async () => {
+  await connectTestDB();
+  await cleanDB();
+});
+
+afterAll(async () => {
+  await disconnectTestDB();
+});
 
 describe('Auth API - POST /api/auth/register', () => {
   it('should register a new freelancer successfully', async () => {

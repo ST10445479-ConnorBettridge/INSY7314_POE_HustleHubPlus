@@ -2,3 +2,5 @@ node_modules/
 logs/
 certs/
 .env
+tests/.test-mongodb-uri
+.mongo-data/

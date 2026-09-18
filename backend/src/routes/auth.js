@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { registerValidation, loginValidation } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
-const { createUser, authenticateUser } = require('../models/user');
+const User = require('../models/user');
 const { AppError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 
@@ -29,7 +29,7 @@ router.post('/register', registerValidation, async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const user = await createUser({ name, email, password, role });
+    const user = await User.createUser({ name, email, password, role });
     if (!user) {
       return next(new AppError('A user with this email already exists', 409));
     }
@@ -52,7 +52,7 @@ router.post('/login', loginValidation, async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await authenticateUser(email, password);
+    const user = await User.authenticate(email, password);
     if (!user) {
       return next(new AppError('Invalid email or password', 401));
     }
