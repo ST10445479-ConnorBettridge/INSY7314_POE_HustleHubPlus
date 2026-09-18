@@ -8,7 +8,7 @@ A secure full-stack freelance marketplace platform built with the **MERN** stack
 - **Postman collection**: [`HustleHub+ Postman Collection.json`](HustleHub%2B%20Postman%20Collection.json)
 - **Architecture diagram**: [`architecture-diagram.svg`](architecture-diagram.svg)
 - **Web & API response screenshots**: [`docs/screenshots/`](docs/screenshots/)
-- **Test suites**: backend Jest (60 tests), frontend Vitest (19 tests), end-to-end smoke (26 assertions), Postman/Newman (110 assertions)
+- **Test suites**: backend Jest (62 tests), frontend Vitest (20 tests), end-to-end smoke (26 assertions), Postman/Newman (110 assertions)
 
 ## Table of Contents
 
@@ -122,7 +122,7 @@ All external communication occurs over TLS through the HTTPS server — the sing
 │   │   ├── models/                      # Mongoose: User, Gig, Booking, Transaction
 │   │   ├── routes/                      # auth, gigs, bookings, income
 │   │   └── utils/logger.js
-│   └── tests/                           # Jest unit/integration tests (60)
+│   └── tests/                           # Jest unit/integration tests (61)
 └── frontend/
     ├── package.json                     # scripts: dev, build, preview, test
     ├── index.html
@@ -135,7 +135,7 @@ All external communication occurs over TLS through the HTTPS server — the sing
         ├── pages/                       # Home, Login, Register, GigDetail, NotFound
         │   └── dashboard/               # DashboardLayout, FreelancerGigs, GigForm,
         │                                #   BookingsList, FreelancerIncome
-        └── test/                        # Vitest + Testing Library suites (19)
+        └── test/                        # Vitest + Testing Library suites (20)
 ```
 
 ---
@@ -265,8 +265,8 @@ A Vite + React single-page app served by the backend itself (built `dist` mounte
 | `/` | Home — gig marketplace with search | Public |
 | `/login`, `/register` | Auth pages | Public |
 | `/gigs/:id` | Gig detail + book | Public (book = client) |
-| `/dashboard` | Client dashboard — my bookings | Client |
-| `/dashboard/freelancer` | Freelancer dashboard — my gigs | Freelancer |
+| `/dashboard` | Client dashboard — my bookings / Freelancer landing (redirect by role) | Client / Freelancer |
+| `/dashboard/gigs` | Freelancer dashboard — my gigs | Freelancer |
 | `/dashboard/new-gig`, `/dashboard/edit-gig/:id` | Gig form | Freelancer |
 | `/dashboard/income` | Income + estimated tax | Freelancer |
 | `*` | 404 Not Found | – |
@@ -283,7 +283,7 @@ A Vite + React single-page app served by the backend itself (built `dist` mounte
 
 ## Android App
 
-A native Kotlin client in `android/` from Part 1 (Splash → Login → Register → Dashboard) using Retrofit + OkHttp with **certificate pinning** against the self-signed cert (`res/raw/server_cert.pem`) and AES-256-GCM token storage via `EncryptedSharedPreferences`. It shares the same backend and API envelope as the web app. See `android/` for the full structure. Rebuild after regenerating the backend certificate (the generator auto-syncs the pin).
+A native Kotlin client in `android/` from Part 1 (Splash → Login → Register → Dashboard) using Retrofit + OkHttp with **certificate trust anchoring** against the self-signed cert (`res/raw/server_cert.pem`) via Android Network Security Config AES-256-GCM token storage via `EncryptedSharedPreferences`. It shares the same backend and API envelope as the web app. See `android/` for the full structure. Rebuild after regenerating the backend certificate (the generator auto-syncs the pin).
 
 ---
 
@@ -356,14 +356,14 @@ Browsers and Postman show a warning for self-signed certs. Options:
 
 ```bash
 cd backend
-npm test                     # 60 tests — auth, RBAC, gigs CRUD, bookings, income, security
+npm test                     # 62 tests — auth, RBAC, gigs CRUD, bookings, income, security
 ```
 
 ### Frontend (Vitest + Testing Library)
 
 ```bash
 cd frontend
-npm test                     # 19 tests across 5 suites (Navbar, AuthPages, Home, GigDetail, GigForm)
+npm test                     # 20 tests across 5 suites (Navbar, AuthPages, Home, GigDetail, GigForm)
 ```
 
 ### End-to-end smoke (HTTPS)
@@ -408,3 +408,6 @@ All web UI and API screenshots live in [`docs/screenshots/`](docs/screenshots/) 
 | 8 | Income + estimated tax | `web_08_income.png` |
 | 9 | 404 Not Found | `web_09_404.png` |
 | 10 | Home — live search results | `web_10_search.png` |
+| 11 | Freelancer bookings — bookings on my gigs | `web_11_freelancer_bookings.png` |
+| 12 | Gig form (edit, pre-filled) | `web_12_gig_form_edit.png` |
+| 13 | Booking confirmation (inline) | `web_13_booking_confirmed.png` |
