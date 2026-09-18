@@ -147,7 +147,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/income', incomeRoutes);
 
 // Serve the built React frontend when it exists (full-stack single-origin mode).
-const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
+const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
   app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
