@@ -1,38 +1,47 @@
-# API Response Screenshots
+# Screenshots
 
-Captured from the terminal against the live HTTPS API at `https://localhost:3443`.
-Each frame shows the request, the JSON response and the HTTP status code.
+Screenshots captured from the live application (Edge, 1280×900) via the DevTools Protocol and saved as PNGs. Filenames match the links in the root README table.
 
-| File | Covers |
-|------|--------|
-| `01_registration_responses.png` | health 200, register 201, duplicate 409, validation 400, login 200 |
-| `02_protected_routes_and_errors.png` | profile 200, profile 401 (no token), 404 unknown route, admin role 400, malformed JSON 400 |
+## Web UI (Part 2)
 
-The full set of requests, including the invalid scenarios, is also provided as a
-Postman collection in the repository root: `HustleHub+ Postman Collection.json`.
+| # | Screen | Route used | Filename |
+|---|--------|------------|----------|
+| 1 | Home — gig marketplace | `/` | `web_01_home.png` |
+| 2 | Login | `/login` | `web_02_login.png` |
+| 3 | Register | `/register` | `web_03_register.png` |
+| 4 | Gig detail (public view) | `/gigs/:id` | `web_04_gig_detail.png` |
+| 5 | Client dashboard — my bookings (`alex@hustlehub.demo`) | `/dashboard` | `web_05_client_dashboard.png` |
+| 6 | Freelancer dashboard — my gigs (`zane@hustlehub.demo`) | `/dashboard/freelancer` | `web_06_freelancer_dashboard.png` |
+| 7 | Gig form (create) | `/dashboard/gigs/new` | `web_07_gig_form.png` |
+| 8 | Income + estimated tax | `/dashboard/income` | `web_08_income.png` |
+| 9 | 404 Not Found | `/does-not-exist` | `web_09_404.png` |
 
-## Reproducing these
+## API responses (Part 1, Postman)
 
-Start the backend, then in a bash shell:
+These were captured in Postman for the Part 1 milestone and show the request name, status code and response time in the footer. Keep the naming so the old README links resolve.
 
-```bash
-API=https://localhost:3443
-api(){ out=$(curl -sk -w $'
-%{http_code}' "$@"); code=${out##*$'
-'}; body=${out%$'
-'*}; echo "$body" | python -m json.tool 2>/dev/null || echo "$body"; echo "-- HTTP $code"; }
+| # | Request | Expected Status | Filename |
+|---|---------|-----------------|----------|
+| 1 | GET `/api/health` | 200 | `01_health.png` |
+| 2 | POST `/api/auth/register` — Freelancer success | 201 | `02_register_success.png` |
+| 3 | POST `/api/auth/register` — Client success | 201 | `03_register_client.png` |
+| 4 | POST `/api/auth/register` — Duplicate email | 409 | `04_register_duplicate.png` |
+| 5 | POST `/api/auth/register` — Validation errors | 400 | `05_register_validation.png` |
+| 6 | POST `/api/auth/register` — Admin role rejected | 400 | `06_register_admin_rejected.png` |
+| 7 | POST `/api/auth/login` — Success with JWT | 200 | `07_login_success.png` |
+| 8 | POST `/api/auth/login` — Wrong password | 401 | `08_login_wrong_password.png` |
+| 9 | POST `/api/auth/login` — Non-existent user | 401 | `09_login_no_user.png` |
+| 10 | POST `/api/auth/login` — Malformed JSON | 400 | `10_login_malformed_json.png` |
+| 11 | POST `/api/auth/login` — Oversized body | 413 | `11_login_oversized.png` |
+| 12 | GET `/api/auth/profile` — Valid token | 200 | `12_profile_success.png` |
+| 13 | GET `/api/auth/profile` — No token | 401 | `13_profile_no_token.png` |
+| 14 | GET `/api/auth/profile` — Invalid token | 401 | `14_profile_invalid_token.png` |
+| 15 | GET `/api/auth/profile` — Expired token | 401 | `15_profile_expired_token.png` |
+| 16 | GET `/api/unknown/route` — Not found | 404 | `16_404_unknown_route.png` |
 
-api $API/api/health
-api -X POST $API/api/auth/register -H "Content-Type: application/json" -d '{"name":"Connor Bettridge","email":"connor@example.com","password":"SecurePass1!","role":"freelancer"}'
-api -X POST $API/api/auth/register -H "Content-Type: application/json" -d '{"name":"Connor Bettridge","email":"connor@example.com","password":"SecurePass1!","role":"freelancer"}'
-api -X POST $API/api/auth/register -H "Content-Type: application/json" -d '{"name":"","email":"not-an-email","password":"weak","role":"superadmin"}'
-api -X POST $API/api/auth/login -H "Content-Type: application/json" -d '{"email":"connor@example.com","password":"SecurePass1!"}'
+## How the web screenshots were captured
 
-TOKEN=$(curl -sk -X POST $API/api/auth/login -H "Content-Type: application/json" -d '{"email":"connor@example.com","password":"SecurePass1!"}' | python -c "import sys,json;print(json.load(sys.stdin)['data']['token'])")
-
-api $API/api/auth/profile -H "Authorization: Bearer $TOKEN"
-api $API/api/auth/profile
-api $API/api/unknown/route
-api -X POST $API/api/auth/register -H "Content-Type: application/json" -d '{"name":"Mallory","email":"mallory@example.com","password":"SecurePass1!","role":"admin"}'
-api -X POST $API/api/auth/login -H "Content-Type: application/json" -d '{"email":"connor@example.com",'
-```
+1. Start the backend and seed: `cd backend && npm start` then `npm run seed`
+2. Launch Edge with remote debugging: `msedge --remote-debugging-port=9222 --user-data-dir=<tmp> --ignore-certificate-errors about:blank`
+3. Drive via the DevTools Protocol (see `scripts/capture-screens.js`): navigate each route, log in as the demo account via `fetch`, take `Page.captureScreenshot` at 1280×900.
+4. Demo accounts (password `DemoPass1!`): `alex@hustlehub.demo` (client), `zane@hustlehub.demo` / `mia@hustlehub.demo` (freelancers).

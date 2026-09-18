@@ -1,14 +1,14 @@
 # HustleHub+
 
-A secure freelance marketplace platform backend built with Node.js and Express.
+A secure full-stack freelance marketplace platform built with the **MERN** stack (MongoDB, Express, React, Node.js). Freelancers publish gigs, clients book and pay for them, and each side gets a dedicated dashboard.
 
 ## Submission Artefacts
 
-- **Part 1 report**: [`HustleHub+_Part1_Report.pdf`](HustleHub%2B_Part1_Report.pdf)
-- **Demonstration video**: [youtu.be/e93GCEHJpSw](https://youtu.be/e93GCEHJpSw)
+- **Demonstration video**: <add link to your demo video here — still being made>
 - **Postman collection**: [`HustleHub+ Postman Collection.json`](HustleHub%2B%20Postman%20Collection.json)
 - **Architecture diagram**: [`architecture-diagram.svg`](architecture-diagram.svg)
-- **API response screenshots**: [`docs/screenshots/`](docs/screenshots/)
+- **Web & API response screenshots**: [`docs/screenshots/`](docs/screenshots/)
+- **Test suites**: backend Jest (60 tests), frontend Vitest (19 tests), end-to-end smoke (26 assertions), Postman/Newman (110 assertions)
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ A secure freelance marketplace platform backend built with Node.js and Express.
 1. [System Overview](#system-overview)
 2. [Intended Users](#intended-users)
 3. [Architecture](#architecture)
-4. [Backend Structure](#backend-structure)
+4. [Project Structure](#project-structure)
 5. [API Endpoints](#api-endpoints)
 6. [Security Decisions](#security-decisions)
    - [Password Hashing](#password-hashing)
@@ -24,214 +24,162 @@ A secure freelance marketplace platform backend built with Node.js and Express.
    - [Input Validation](#input-validation)
    - [HTTPS Configuration](#https-configuration)
    - [Additional Security Measures](#additional-security-measures)
-7. [Setup Instructions](#setup-instructions)
-8. [Screenshots of API Responses](#screenshots-of-api-responses)
+7. [Frontend (React)](#frontend-react)
+8. [Android App](#android-app)
+9. [Setup Instructions](#setup-instructions)
+10. [Running the Tests](#running-the-tests)
+11. [Screenshots](#screenshots)
 
 ---
 
 ## System Overview
 
-HustleHub+ is a freelance marketplace platform that connects freelancers offering services with clients seeking to book those services. The platform processes financial transactions and provides income tracking with estimated tax calculations.
+HustleHub+ connects **freelancers** offering services with **clients** seeking to book them. The platform handles gig listings, bookings, payment transactions and income tracking with estimated tax calculations.
 
-The system follows the **MERN architecture** (MongoDB, Express, React, Node.js). Part 1 delivers the Express/Node API layer with in-memory persistence (to be replaced with MongoDB in a later phase). A native **Android app (Kotlin)** was additionally implemented to consume the API over HTTPS, ahead of the **React web frontend** planned for Part 2.
+The system follows the **MERN architecture** and runs over HTTPS:
 
-### Core Features (Current Phase)
-- Secure user registration and authentication
-- Role-based user accounts (Client, Freelancer; Admin role reserved for platform management)
-- JWT-based protected API routes
-- HTTPS-secured communications
-- Input validation and sanitisation
-- Structured error handling and logging
+- **Backend**: Express + Node.js with a real MongoDB persistence layer (an embedded in-memory MongoDB server in development, or any `MONGODB_URI`)
+- **Frontend**: React single-page application (Vite + React Router) consuming the same API
+- **Mobile**: a native **Android app (Kotlin)** consuming the same API over TLS with certificate pinning
+- **HTTPS everywhere**: the server enforces TLS; all three clients trust the same self-signed certificate
+
+### Core Features
+
+- Secure user registration and authentication (bcrypt + JWT)
+- Role-based accounts with access control (Client, Freelancer; Admin cannot be self-assigned)
+- Gig marketplace — browse, create, update, delete gig listings
+- Booking workflow — clients book gigs, transactions are recorded automatically
+- Income dashboard for freelancers — earnings + estimated tax (SECA-style 15.3%)
+- Input validation, sanitisation and NoSQL-injection defence
+- Hardened API (rate limiting, CSP headers, TLS 1.2+, controlled errors)
 
 ---
 
 ## Intended Users
 
-The platform supports three user roles:
-
 | Role | Description |
 |------|-------------|
 | **Client** | Browses services and books gigs offered by freelancers |
 | **Freelancer** | Creates and manages gig listings, earns income, views tax estimates |
-| **Admin** | Manages the platform, oversees users and transactions |
+| **Admin** | Reserved for platform management; cannot be self-assigned through the API |
 
 ---
 
 ## Architecture
 
-The MERN stack defines the server-side and browser-side architecture: **MongoDB** (Part 2), **Express**, **React** (Part 2), **Node.js**. Part 1 delivers the Express/Node layer with in-memory persistence, as permitted by the brief. A native **Android client** was additionally implemented in Part 1 to demonstrate the API being consumed over TLS by a real client ahead of the React frontend.
-
 ![HustleHub+ Architecture Diagram](architecture-diagram.svg)
 
 ### Diagram Description
 
-The architecture consists of three main layers:
+1. **Client Layer**: three clients share the same HTTPS boundary — the **React web app** (this phase), the **Android app** (Kotlin, Retrofit + OkHttp, pinned self-signed cert at `https://10.0.2.2:3443/`), and **Postman/Newman** for API testing.
 
-1. **Client Layer**: Two clients consume the API over the same HTTPS boundary — the **React web frontend** (planned for Part 2, sharing the same API) and the **Android app (Kotlin)** implemented in this part. The Android app is built with Retrofit and OkHttp and pins the backend's self-signed certificate, connecting to the backend at `https://10.0.2.2:3443/` from the Android emulator.
+2. **API Layer**: the Express server routes requests through middleware pipelines:
+   - **Security**: Helmet (security headers), rate limiting, HTTPS enforcement, `express-mongo-sanitize`, XSS sanitisation
+   - **Authentication**: JWT verification for protected routes
+   - **Validation**: express-validator rules for every endpoint
+   - **Error handling**: centralised handler that never leaks internals
+   - **Logging**: Winston structured logs
 
-2. **API Layer**: The Express.js server sits at the core, routing requests through middleware pipelines:
-   - **Security Middleware**: Helmet (HTTP headers), Rate Limiting, HTTPS enforcement
-   - **Authentication Middleware**: JWT verification for protected routes
-   - **Validation Middleware**: Input sanitisation and validation via express-validator
-   - **Error Handling**: Centralised error handler prevents information leakage
-   - **Logging**: Winston-based structured logging of system events
-   
-3. **Data Layer**: Currently uses in-memory storage for user data (to be replaced with MongoDB). Application logs are written to the filesystem.
+3. **Data Layer**: MongoDB (Mongoose). In development the server boots a real embedded MongoDB instance automatically; provide `MONGODB_URI` to use an existing database.
 
 ### System Boundary
 
-The system boundary is the HTTPS interface. All external communication occurs over TLS-encrypted connections. The API server is the sole entry point. Internal components (middleware, controllers, models) operate within the server process boundary.
+All external communication occurs over TLS through the HTTPS server — the single entry point. Middleware, controllers and models operate inside the server process.
 
 ### Security Boundaries
 
-- **Network Boundary**: HTTPS/TLS encryption protects data in transit
-- **Authentication Boundary**: JWT tokens gate access to protected resources
-- **Validation Boundary**: All input is validated before processing
-- **Error Boundary**: Controlled error responses prevent information disclosure
-- **Storage Boundary**: Passwords are hashed before storage (never plain-text)
+- **Network**: HTTPS/TLS protects data in transit
+- **Authentication**: JWT gates access to protected resources
+- **Validation**: every input is validated and sanitised before processing
+- **Error**: controlled responses prevent information disclosure
+- **Storage**: passwords are bcrypt-hashed, never stored in plain text
 
 ---
 
-## Backend Structure
+## Project Structure
 
 ```
-backend/
-├── server.js                 # Entry point - HTTPS server
-├── .env                      # Environment variables
-├── package.json
-├── certs/
-│   ├── cert.pem              # SSL certificate (self-signed for development)
-│   └── key.pem               # SSL private key
-├── logs/                     # Application logs (generated at runtime)
-│   ├── combined.log
-│   └── error.log
+├── HustleHub+ Postman Collection.json   # Importable Postman collection (generated)
 ├── scripts/
-│   └── generate-cert.js      # Self-signed certificate generator
-├── src/
-│   ├── app.js                # Express app configuration
-│   ├── middleware/
-│   │   ├── auth.js           # JWT authentication middleware
-│   │   ├── errorHandler.js   # Centralised error handler + AppError class
-│   │   └── validate.js       # Input validation rules (register & login)
-│   ├── models/
-│   │   └── user.js           # User data model (in-memory storage)
-│   ├── routes/
-│   │   └── auth.js           # Authentication routes (register, login, profile)
-│   └── utils/
-│       └── logger.js         # Winston logger configuration
-├── jest.config.js            # Loads the test environment before the suites
-└── tests/
-    ├── env.setup.js          # Test-only JWT_SECRET so a clean clone can run
-    ├── auth.test.js          # Endpoint tests
-    └── security.test.js      # Security regression tests
+│   └── build-postman.js                 # Regenerates the Postman collection
+├── backend/
+│   ├── server.js                        # HTTPS server entry point
+│   ├── package.json                     # scripts: start, dev, seed, e2e:smoke, test, test:newman
+│   ├── .env.example                     # environment template (JWT_SECRET etc.)
+│   ├── certs/                           # generated self-signed cert + key
+│   ├── scripts/
+│   │   ├── generate-cert.js             # cert generator (auto-syncs Android pin)
+│   │   ├── extract-certs.js
+│   │   ├── seed.js                      # demo data seeder
+│   │   └── e2e-smoke.js                 # HTTPS end-to-end smoke suite
+│   ├── src/
+│   │   ├── app.js                       # Express app + security middleware + SPA serving
+│   │   ├── middleware/
+│   │   │   ├── auth.js                  # JWT verify + role guard
+│   │   │   ├── errorHandler.js          # centralised errors + AppError
+│   │   │   ├── validate.js              # express-validator rules
+│   │   │   └── sanitize.js              # XSS string stripping
+│   │   ├── models/                      # Mongoose: User, Gig, Booking, Transaction
+│   │   ├── routes/                      # auth, gigs, bookings, income
+│   │   └── utils/logger.js
+│   └── tests/                           # Jest unit/integration tests (60)
+└── frontend/
+    ├── package.json                     # scripts: dev, build, preview, test
+    ├── index.html
+    └── src/
+        ├── main.jsx / App.jsx           # router + routes
+        ├── index.css                    # design system
+        ├── api/client.js                # fetch wrapper (JWT header, envelope unwrap)
+        ├── context/AuthContext.jsx      # auth state + token persistence
+        ├── components/                  # Layout, Navbar, ProtectedRoute, GigCard, Field, Alert, ...
+        ├── pages/                       # Home, Login, Register, GigDetail, NotFound
+        │   └── dashboard/               # DashboardLayout, FreelancerGigs, GigForm,
+        │                                #   BookingsList, FreelancerIncome
+        └── test/                        # Vitest + Testing Library suites (19)
 ```
-
----
-
-## Android App
-
-A native Android client (Kotlin) located in the `android/` folder. It implements the Part 1 requirements on the client side: secure registration, login, and profile retrieval against the HustleHub+ backend.
-
-### Features
-
-- **Splash → Login → Register → Dashboard** flow with token persistence
-- **Client-side input validation** mirroring the server rules (email format, password strength, confirm-password match)
-- **Encrypted token storage** via `EncryptedSharedPreferences` (AES-256-GCM)
-- **Certificate pinning**: the app embeds the backend's self-signed certificate (`res/raw/server_cert.pem`) and only trusts that exact certificate over TLS
-- **Server error surfacing**: controlled error messages parsed from the API's JSON error responses
-
-### App Structure
-
-```
-android/
-├── settings.gradle / build.gradle / gradle.properties
-├── app/
-│   ├── build.gradle               # AGP 8.1.2, Kotlin 1.9.24, minSdk 26
-│   └── src/main/
-│       ├── AndroidManifest.xml    # network security config, INTERNET permission
-│       ├── res/
-│       │   ├── raw/server_cert.pem      # pinned backend certificate
-│       │   ├── xml/network_security_config.xml
-│       │   ├── layout/            # activity_login, activity_register, activity_dashboard
-│       │   └── values/            # dark theme, strings
-│       └── java/com/hustlehub/app/
-│           ├── MainActivity.kt    # splash + auth routing
-│           ├── LoginActivity.kt   # login screen
-│           ├── RegisterActivity.kt# registration screen
-│           ├── DashboardActivity.kt # profile, JWT, security status
-│           ├── HustleHubApplication.kt
-│           ├── api/               # Retrofit ApiClient + ApiService
-│           ├── model/             # request/response DTOs
-│           └── security/          # TokenManager (EncryptedSharedPreferences)
-└── app/src/test/                  # Robolectric unit tests (no device needed)
-```
-
-### Running the App
-
-1. Start the backend first (see [Setup Instructions](#setup-instructions)).
-2. Open the `android/` folder in **Android Studio** (Giraffe 2022.3.1 or newer).
-   Use a **JDK 17** toolchain — AGP 8.1.2 cannot build under JDK 21.
-3. Create/start an emulator (API 26–34) — the app connects to the host machine via `https://10.0.2.2:3443/`.
-4. Run the `app` configuration. Build output APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
-
-> **Note**: the pinned certificate must match the backend's `certs/cert.pem`. Both `backend/scripts/generate-cert.js` and `backend/scripts/extract-certs.js` regenerate the certificate **and automatically sync** it to `android/app/src/main/res/raw/server_cert.pem`, so the server and the Android client always stay in sync. Rebuild the app after regenerating.
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|---------------|-------------|
-| GET | `/api/health` | No | Health check |
-| POST | `/api/auth/register` | No | Register a new user |
-| POST | `/api/auth/login` | No | Login and receive JWT |
-| GET | `/api/auth/profile` | Yes | Get authenticated user profile |
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|------|------|-------------|
+| GET | `/api/health` | No | – | Health check (with security header report) |
+| POST | `/api/auth/register` | No | – | Register client/freelancer |
+| POST | `/api/auth/login` | No | – | Login, returns JWT |
+| GET | `/api/auth/profile` | Yes | Any | Current user profile |
+| GET | `/api/gigs` | No | – | List gigs (search by category/query) |
+| GET | `/api/gigs/:id` | No | – | Gig detail |
+| POST | `/api/gigs` | Yes | Freelancer | Create a gig |
+| PUT | `/api/gigs/:id` | Yes | Owner | Update own gig |
+| DELETE | `/api/gigs/:id` | Yes | Owner | Delete own gig (+ bookings/transactions) |
+| POST | `/api/bookings` | Yes | Client | Book a gig (auto-creates transaction) |
+| GET | `/api/bookings` | Yes | Client | My bookings |
+| GET | `/api/bookings/by-gig/:gigId` | Yes | Freelancer | Bookings on my gig |
+| GET | `/api/income` | Yes | Freelancer | Earnings + tax estimate |
 
-### Request/Response Examples
+### Response Envelope
 
-**POST /api/auth/register**
+Every response follows the same shape: `{ status: 'success' | 'error', message, data?, statusCode? }`. Errors carry a `statusCode` and a human-readable `message` (combined validation messages, never stack traces).
+
+**POST /api/auth/login**
 ```json
-// Request
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "SecurePass1!",
-  "role": "freelancer"
-}
-
-// Response (201)
 {
   "status": "success",
-  "message": "User registered successfully",
+  "message": "Login successful",
   "data": {
-    "user": {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com",
-      "role": "freelancer",
-      "createdAt": "2026-07-29T08:39:06.991Z"
-    },
+    "user": { "id": "...", "name": "Zane Dev", "email": "zane@hustlehub.demo", "role": "freelancer" },
     "token": "eyJhbGciOiJIUzI1NiIs..."
   }
 }
 ```
 
-**POST /api/auth/login**
+**Validation error example (400)**
 ```json
-// Request
 {
-  "email": "john@example.com",
-  "password": "SecurePass1!"
-}
-
-// Response (200)
-{
-  "status": "success",
-  "message": "Login successful",
-  "data": {
-    "user": { "...user data..." },
-    "token": "eyJhbGciOiJIUzI1NiIs..."
-  }
+  "status": "error",
+  "statusCode": 400,
+  "message": "Title is required. Description is required"
 }
 ```
 
@@ -241,131 +189,101 @@ android/
 
 ### Password Hashing
 
-**Algorithm**: bcrypt with 12 salt rounds
+**Algorithm**: bcrypt with 12 salt rounds.
 
-**Why bcrypt?**
-- **Slow by design**: bcrypt is deliberately computationally expensive, making brute-force and rainbow table attacks infeasible. A single bcrypt hash at 12 rounds takes ~250ms to compute, severely limiting attack velocity.
-- **Built-in salting**: Each password is automatically combined with a unique cryptographic salt before hashing. This means even if two users have the same password, their stored hashes will be different.
-- **Adaptive cost factor**: The cost factor (salt rounds) can be increased as hardware improves, maintaining future security.
-- **Proven track record**: bcrypt has been widely peer-reviewed and is considered the industry standard for password storage.
+- **Slow by design**: ~250ms per hash limits brute-force velocity.
+- **Built-in salting**: unique salt per password; identical passwords hash differently.
+- **Adaptive cost**: rounds can be raised as hardware improves.
+- **Constant-time compare** prevents timing attacks during login.
 
-**Implementation**:
 ```javascript
 const hashedPassword = await bcrypt.hash(userData.password, 12);
 const isMatch = await bcrypt.compare(password, user.password);
 ```
 
-Passwords are hashed **before** storage. The plain-text password is never retained. During login, bcrypt's `compare` function performs constant-time comparison to prevent timing attacks.
-
 ### Token-Based Authentication
 
-**Algorithm**: JSON Web Tokens (JWT) using HS256 (HMAC with SHA-256)
+**Algorithm**: JWT, HS256, pinned to `algorithms: ['HS256']` so `alg: none` / algorithm-confusion are rejected. Tokens are bound to issuer `hustlehub-plus` and audience `hustlehub-plus-api`, expire in 1 hour (`JWT_EXPIRES_IN`), and are signed with a 32+ character random secret (server refuses to start otherwise).
 
-**Why JWT?**
-- **Stateless**: No server-side session storage is required. Tokens are self-contained, reducing database load.
-- **Self-validating**: Each token contains the user identity and metadata, signed by the server. No token lookup is needed on each request.
-- **Expiration**: Tokens have a configurable expiry (`JWT_EXPIRES_IN = 1h`), limiting the window of compromised token misuse.
+**Payload**: `{ id, email, role, name, iat, exp }` — stateless, self-validating.
 
-**Token Payload**:
-```json
-{
-  "id": 1,
-  "email": "john@example.com",
-  "role": "freelancer",
-  "name": "John Doe",
-  "iat": 1785314346,
-  "exp": 1785317946
-}
-```
-
-**Validation Flow**:
-1. Client sends `Authorization: Bearer <token>` header
-2. Server verifies the token signature using `JWT_SECRET`
-3. Server checks token expiration
-4. Decoded payload is attached to `req.user` for downstream use
-5. Invalid/expired tokens return 401 with appropriate messages
+**Validation flow**: `Authorization: Bearer <token>` → signature verified → expiry checked → payload attached to `req.user`; invalid/expired tokens return 401.
 
 ### Input Validation
 
-**Library**: express-validator
+Express-validator rules for every endpoint (registration, login, gig create/update, booking, `:id` params):
 
-**Validation Rules - Registration**:
-- **Name**: Required, trimmed, max 100 characters, HTML-escaped
-- **Email**: Required, valid email format, normalised (lowercased)
-- **Password**: Minimum 8 characters, must contain uppercase, lowercase, number, and special character
-- **Role**: Must be one of: `client` or `freelancer`. The `admin` role cannot be self-assigned through any API endpoint (see [Privilege Escalation](#hardening-against-common-attacks)).
+- **Register**: name ≤ 100 chars, valid email, strong password (≥ 8 chars, upper/lower/digit/special), role restricted to `client` / `freelancer`
+- **Login**: valid email + non-empty password
+- **Gig**: title 3–100, description 10–2000, price 1–1,000,000, delivery days 1–365
+- **IDs**: all Mongo `:id` params validated as ObjectIds
 
-**Validation Rules - Login**:
-- **Email**: Required, valid email format
-- **Password**: Required (non-empty)
-
-**Why validate?**
-- **Prevents injection attacks**: Input sanitisation (trim, escape) prevents XSS and other injection vectors
-- **Enforces data integrity**: Malformed or incomplete data is rejected before reaching business logic
-- **Reduces attack surface**: Strict input constraints limit the types of payloads an attacker can submit
-- **User feedback**: Clear validation error messages help legitimate users correct their input
-
-Validation occurs in a middleware pipeline. If validation fails, the middleware immediately responds with a 400 status and descriptive error messages, never reaching the route handler.
+All string fields are **trimmed** and **XSS-stripped** (`xss` + `sanitize.js`) before storage; `express-mongo-sanitize` neutralises `$`-prefixed operator injection (`$gt`, `$ne`, …).
 
 ### HTTPS Configuration
 
-**Implementation**: The server uses Node.js `https.createServer` with a locally generated SSL certificate.
+Node `https.createServer` with a locally generated self-signed certificate (node-forge). TLS 1.2+ enforced (`minVersion: 'TLSv1.2'`). In production a trusted CA (e.g. Let's Encrypt) would replace the self-signed cert.
 
-**Why HTTPS?**
-- **Encryption in transit**: All data exchanged between client and server is encrypted using TLS, preventing eavesdropping and man-in-the-middle attacks.
-- **Data integrity**: TLS ensures data cannot be tampered with during transmission.
-- **Authentication**: The SSL certificate verifies the server's identity to the client.
-- **Regulatory compliance**: Many data protection regulations (e.g., POPIA, GDPR) require encryption of personal data in transit.
-
-**Certificate Generation**: A self-signed certificate is generated for development using node-forge. In production, certificates from a trusted Certificate Authority (e.g., Let's Encrypt) would be used.
-
-**Note**: Self-signed certificates trigger browser security warnings. They are appropriate for development and testing but should never be used in production.
+Self-signed certificates trigger browser warnings — appropriate for development and testing only.
 
 ### Additional Security Measures
 
-**Helmet**: Sets secure HTTP headers including:
-- `Content-Security-Policy` - Controls resource loading
-- `X-Content-Type-Options` - Prevents MIME-type sniffing
-- `X-Frame-Options` - Prevents clickjacking
-- `Strict-Transport-Security` - Enforces HTTPS
+**Helmet** sets `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, and more.
 
-**Rate Limiting**:
-- Global: 100 requests per 15-minute window per IP
-- Auth endpoints: 10 requests per 15-minute window per IP
-- Prevents brute-force attacks and DoS attempts
+**Rate limiting** (`express-rate-limit`, per IP, in-memory):
+- Global: 100 / 15 min
+- Auth (login + register): 10 / 15 min
+- Bookings: 20 / 15 min
 
-**Request Body Size Limit**: `express.json({ limit: '10kb' })` prevents large payload attacks.
+**Request body limit**: `express.json({ limit: '10kb' })` (413 beyond) and malformed JSON returns a controlled 400.
 
-**Controlled Error Responses**: The centralised error handler:
-- Returns generic "Internal server error" for unexpected errors
-- Only exposes operational error messages (expected failure modes)
-- Never reveals stack traces, file paths, or internal configuration
-- Logs full error details server-side for debugging
+**Controlled errors**: unexpected errors return generic `Internal server error`; full details go to server logs only (Winston).
 
-**Structured Logging**: Winston logs all key system events:
-- User registration and login attempts
-- Authentication failures
-- Server errors (with stack traces, logged server-side only)
+**User enumeration defence**: login performs a dummy bcrypt comparison for unknown emails so account existence can't be detected via response timing.
 
 ### Hardening Against Common Attacks
 
-The API has been hardened against the OWASP Top 10 risks most likely to be tested:
+- **NoSQL injection**: `express-mongo-sanitize` strips `$`/`.` operator keys; `:id` params are validated as ObjectIds. Verified by `{ "$gt": "" }` injection attempts being neutralised.
+- **XSS / stored XSS**: `xss` strips script tags from all string input before storage; the React app additionally renders nothing as raw HTML. Verified by injecting `<script>` payloads and confirming stripped output.
+- **Privilege escalation**: the `admin` role cannot be self-assigned; registration role is whitelist-validated. Verified by `role: "admin"` returning 400.
+- **JWT attacks**: algorithm pinned to HS256; issuer/audience bound; 401 on invalid/expired.
+- **Mass assignment**: only whitelisted fields are extracted from bodies.
+- **Rate limiting**: brute-force throttled with 429 responses — proven by the Postman suite's 12-login flood test.
 
-**SQL Injection**: The data layer uses an in-memory store — no SQL queries are constructed anywhere, so SQL injection is structurally impossible. As defense in depth, every input is validated with `express-validator` and string fields are HTML-escaped before storage. Verified by tests that send `' OR '1'='1`, `'); DROP TABLE users;--`, and similar payloads.
+All of the above are covered by `backend/tests/security.test.js` and the Postman/Newman suite.
 
-**Privilege Escalation**: Registration only accepts roles `client` or `freelancer`. The `admin` role cannot be self-assigned through any API endpoint.
+---
 
-**JWT Attacks**: Tokens are pinned to the `HS256` algorithm (`algorithms: ['HS256']`), so `alg: "none"` and algorithm-confusion attacks are rejected. Tokens are bound to an issuer and audience (`hustlehub-plus` / `hustlehub-plus-api`), expire after 1 hour, and are signed with a 51-character random secret. `server.js` fails fast at startup if the secret is missing or under 32 characters.
+## Frontend (React)
 
-**Mass Assignment**: Only `name`, `email`, `password`, and `role` are extracted from the request body; unknown fields (e.g. `id`, `isAdmin`, `createdAt`) are silently discarded.
+A Vite + React single-page app served by the backend itself (built `dist` mounted at `/` with SPA fallback).
 
-**Malformed Input / Smuggling**: Broken JSON returns a controlled `400 Invalid JSON payload` (no stack traces leaked), and bodies over 10 KB return `413`.
+### Screens
 
-**User Enumeration (timing)**: Login performs a dummy bcrypt comparison when the email does not exist, so account-existence cannot be detected via response timing.
+| Route | Screen | Access |
+|-------|--------|--------|
+| `/` | Home — gig marketplace with search | Public |
+| `/login`, `/register` | Auth pages | Public |
+| `/gigs/:id` | Gig detail + book | Public (book = client) |
+| `/dashboard` | Client dashboard — my bookings | Client |
+| `/dashboard/freelancer` | Freelancer dashboard — my gigs | Freelancer |
+| `/dashboard/gigs/new`, `/dashboard/gigs/:id/edit` | Gig form | Freelancer |
+| `/dashboard/income` | Income + estimated tax | Freelancer |
+| `*` | 404 Not Found | – |
 
-**TLS**: HTTPS server enforces TLS 1.2+ (`minVersion: 'TLSv1.2'`).
+### Key behaviours
 
-All of the above are covered by automated tests in `backend/tests/security.test.js`.
+- **JWT persistence**: token + user stored in `localStorage`; `AuthContext` restores the session on load.
+- **Protected routes**: `<ProtectedRoute role="freelancer">` redirects to `/login` and blocks cross-role access.
+- **API client** unwraps the envelope (`{ data: ... }`) and normalises errors.
+- **Accessible styling**: `Field` components pair labels with hints; a CSS design system in `src/index.css` (dark theme, cards, badges, tables).
+- All user-generated content is escaped on render (no `dangerouslySetInnerHTML`).
+
+---
+
+## Android App
+
+A native Kotlin client in `android/` from Part 1 (Splash → Login → Register → Dashboard) using Retrofit + OkHttp with **certificate pinning** against the self-signed cert (`res/raw/server_cert.pem`) and AES-256-GCM token storage via `EncryptedSharedPreferences`. It shares the same backend and API envelope as the web app. See `android/` for the full structure. Rebuild after regenerating the backend certificate (the generator auto-syncs the pin).
 
 ---
 
@@ -373,98 +291,119 @@ All of the above are covered by automated tests in `backend/tests/security.test.
 
 ### Prerequisites
 
-- Node.js v18 or higher
-- npm
-- Android Studio Giraffe (2022.3.1) or newer — for the Android app
+- Node.js v18+ and npm
+- Android Studio Giraffe (2022.3.1)+ — only for the mobile app
+- No MongoDB install needed — development uses an embedded in-memory server
 
-### Installation
+### Backend
 
 ```bash
-# Navigate to the backend directory
 cd backend
-
-# Install dependencies
 npm install
-
-# Create your environment file (it is NOT committed, for security)
-cp .env.example .env        # PowerShell: Copy-Item .env.example .env
-
-# Generate a strong JWT_SECRET and paste it into .env
+Copy-Item .env.example .env               # then set a real JWT_SECRET
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-
-# Generate SSL certificate
-node scripts/generate-cert.js
-
-# Start the server
-npm start
-
-# Development mode (with auto-reload)
-npm run dev
+node scripts/generate-cert.js             # creates certs/ + syncs Android pin
+npm start                                 # HTTPS server on https://localhost:3443
 ```
 
-The server will start on `https://localhost:3443`.
+The server refuses to start if `JWT_SECRET` is missing or under 32 characters.
 
-> **Note**: the server refuses to start if `JWT_SECRET` is missing or shorter than 32 characters — set it in `.env`.
+> **In-memory database**: each start boots a fresh MongoDB instance (unless `MONGODB_URI` is set), so data resets on restart. After restarting, re-seed demo data:
 
-### Testing with Postman
+```bash
+npm run seed     # in backend/ — needs the server running, writes via the API
+```
 
-1. Import the Postman collection from `HustleHub+ Postman Collection.json`
-2. Set the `baseUrl` variable to `https://localhost:3443`
-3. Disable SSL certificate verification in Postman settings (Settings > General > SSL certificate verification: OFF)
-4. Test endpoints in order: Health → Register → Login → Profile
-5. The `Profile - Expired Token` request contains a token signed with the development `JWT_SECRET`; if you regenerate your secret, mint a fresh one with:
+Demo accounts (all password `DemoPass1!`):
 
-   ```bash
-   node -e "require('dotenv').config(); console.log(require('jsonwebtoken').sign({id:1,email:'expired@example.com',role:'client',name:'Expired User'}, process.env.JWT_SECRET, {expiresIn:'-60s', issuer:'hustlehub-plus', audience:'hustlehub-plus-api'}))"
-   ```
+| Role | Email |
+|------|-------|
+| Freelancer | `zane@hustlehub.demo` |
+| Freelancer | `mia@hustlehub.demo` |
+| Client | `alex@hustlehub.demo` |
+
+> **Rate limiters are in-memory per server instance.** After heavy automated testing (especially the Postman 429-flood test), restart the server to reset them.
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev      # Vite dev server (proxy → https://localhost:3443)
+```
+
+For production-style serving, build and let the backend serve it:
+
+```bash
+npm run build    # outputs dist/, served by backend at /
+```
+
+(Node's HTTPS cert must be trusted, or the browser will warn — see below.)
+
+### Trusting the self-signed certificate
+
+Browsers and Postman show a warning for self-signed certs. Options:
+- **Postman/Newman**: disable SSL verification, or pass `newman run … --insecure`
+- **Browser**: accept the warning, or install `certs/cert.pem` into the OS trust store
 
 ---
 
-## Screenshots of API Responses
+## Running the Tests
 
-Captured against the live HTTPS API at `https://localhost:3443` and stored in
-`docs/screenshots/`. Each frame shows the request that was sent, the JSON
-response, and the HTTP status code.
+> Several suites need the backend running. After restarting it, run `npm run seed` in `backend/` first (embedded DB is fresh).
 
-### 1. Registration — [`01_registration_responses.png`](docs/screenshots/01_registration_responses.png)
-
-| Request | Status |
-|---------|--------|
-| GET `/api/health` | 200 |
-| POST `/api/auth/register` — freelancer created | 201 |
-| POST `/api/auth/register` — duplicate email | 409 |
-| POST `/api/auth/register` — validation errors | 400 |
-| POST `/api/auth/login` — success with JWT | 200 |
-
-### 2. Protected routes and error handling — [`02_protected_routes_and_errors.png`](docs/screenshots/02_protected_routes_and_errors.png)
-
-| Request | Status |
-|---------|--------|
-| GET `/api/auth/profile` — valid Bearer token | 200 |
-| GET `/api/auth/profile` — no token | 401 |
-| GET `/api/unknown/route` — unknown route | 404 |
-| POST `/api/auth/register` — admin role rejected | 400 |
-| POST `/api/auth/login` — malformed JSON | 400 |
-
-The register-validation response lists every failed rule in one body, and the
-admin-role rejection shows that `role` is a whitelist rather than free text, so
-an account cannot grant itself administrative access at sign-up.
-
-### Running Tests
-
-Backend — 28 tests across two suites. No `.env` is required; `tests/env.setup.js`
-supplies a test-only secret, so this works on a fresh clone:
+### Backend unit/integration (Jest)
 
 ```bash
 cd backend
-npm test
+npm test                     # 60 tests — auth, RBAC, gigs CRUD, bookings, income, security
 ```
 
-Android — 37 Robolectric tests covering splash routing, login, registration,
-back-stack behaviour, the dashboard connection states, refresh guarding and the
-401 auto-logout. No emulator needed, but **JDK 17 is required**:
+### Frontend (Vitest + Testing Library)
 
 ```bash
-cd android
-./gradlew testDebugUnitTest
+cd frontend
+npm test                     # 19 tests across 5 suites (Navbar, AuthPages, Home, GigDetail, GigForm)
 ```
+
+### End-to-end smoke (HTTPS)
+
+```bash
+cd backend
+npm run e2e:smoke            # 26 assertions against the running server
+```
+
+### Postman/Newman (API acceptance)
+
+The collection at `HustleHub+ Postman Collection.json` walks the full product flow — register, login, gig CRUD, booking → transaction, income, plus the security suite (RBAC, XSS, NoSQL injection, admin escalation, 429 throttling):
+
+```bash
+cd backend
+npm run test:newman          # 53 requests / 110 assertions against a running, seeded server
+```
+
+Regenerate the collection after changing requests:
+
+```bash
+node scripts/build-postman.js
+```
+
+---
+
+## Screenshots
+
+All web UI and API screenshots live in [`docs/screenshots/`](docs/screenshots/) — see [the index there](docs/screenshots/README.md) for the full frame-by-frame list.
+
+### Current phase (web app)
+
+| # | Screen | Filename |
+|---|--------|----------|
+| 1 | Home — gig marketplace | `web_01_home.png` |
+| 2 | Login | `web_02_login.png` |
+| 3 | Register | `web_03_register.png` |
+| 4 | Gig detail (client view) | `web_04_gig_detail.png` |
+| 5 | Client dashboard — bookings | `web_05_client_dashboard.png` |
+| 6 | Freelancer dashboard — my gigs | `web_06_freelancer_dashboard.png` |
+| 7 | Gig form (create/edit) | `web_07_gig_form.png` |
+| 8 | Income + estimated tax | `web_08_income.png` |
+| 9 | 404 Not Found | `web_09_404.png` |
