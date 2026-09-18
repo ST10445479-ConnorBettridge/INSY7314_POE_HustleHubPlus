@@ -48,21 +48,56 @@ export default function App() {
         }
       />
 
-      <Route
+<Route
         path="/dashboard/*"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={['client', 'freelancer']}>
             <DashboardLayout />
           </ProtectedRoute>
         }
       >
         <Route index element={<DashboardHome />} />
-        <Route path="gigs" element={<FreelancerGigs />} />
-        <Route path="new-gig" element={<GigForm />} />
-        <Route path="edit-gig/:id" element={<GigForm />} />
-        <Route path="bookings" element={<BookingsList />} />
-        <Route path="income" element={<FreelancerIncome />} />
-      </Route>
+        <Route
+          path="gigs"
+          element={
+            <ProtectedRoute roles={['freelancer']}>
+              <FreelancerGigs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="new-gig"
+          element={
+            <ProtectedRoute roles={['freelancer']}>
+              <GigForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="edit-gig/:id"
+          element={
+            <ProtectedRoute roles={['freelancer']}>
+              <GigForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="bookings"
+          element={
+            <ProtectedRoute roles={['client', 'freelancer']}>
+              <BookingsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="income"
+          element={
+            <ProtectedRoute roles={['freelancer']}>
+              <FreelancerIncome />
+            </ProtectedRoute>
+          }
+        />
+</Route>
 
       <Route
         path="*"

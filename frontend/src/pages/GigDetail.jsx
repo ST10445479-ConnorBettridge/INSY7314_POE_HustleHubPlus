@@ -7,7 +7,7 @@ import Alert from '../components/Alert.jsx';
 
 export default function GigDetail() {
   const { id } = useParams();
-  const { user, isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role } = useAuth();
 
   const [gig, setGig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +37,6 @@ export default function GigDetail() {
       active = false;
     };
   }, [id]);
-
-  const canBook = isAuthenticated && role === 'client' && gig && gig.owner !== user.id;
 
   const handleBook = async (e) => {
     e.preventDefault();
