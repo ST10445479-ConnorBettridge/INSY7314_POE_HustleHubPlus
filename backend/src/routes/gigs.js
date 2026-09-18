@@ -3,6 +3,7 @@ const Gig = require('../models/gig');
 const Booking = require('../models/booking');
 const Transaction = require('../models/transaction');
 const User = require('../models/user');
+const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/roles');
 const { gigValidation, gigIdParamValidation } = require('../middleware/validate');
@@ -146,9 +147,16 @@ router.delete('/:id', authenticate, requireRole('freelancer'), gigIdParamValidat
       return next(new AppError('You can only delete your own gigs', 403));
     }
 
-    await Booking.deleteMany({ gig: gig._id });
-    await Transaction.deleteMany({ gig: gig._id });
-    await gig.deleteOne();
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await Booking.deleteMany({ gig: gig._id }).session(session);
+        await Transaction.deleteMany({ gig: gig._id }).session(session);
+        await gig.deleteOne({ _id: gig._id }).session(session);
+      });
+    } finally {
+      await session.endSession();
+    }
 
     logger.info('Gig deleted', { gigId: req.params.id });
 
