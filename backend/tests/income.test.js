@@ -33,6 +33,10 @@ describe('Income API - GET /api/income (freelancer)', () => {
     expect(res.body.data.income.transactions.length).toBe(3);
     expect(res.body.data.income.transactions[0]).toHaveProperty('reference');
     expect(res.body.data.income.transactions[0]).toHaveProperty('client');
+    // Estimated tax: SECA-style 15.3% of gross earnings.
+    expect(res.body.data.income.taxRate).toBe(0.153);
+    expect(res.body.data.income.taxEstimate).toBeCloseTo((500 + 1200 + 500) * 0.153, 2);
+    expect(res.body.data.income.netIncome).toBeCloseTo((500 + 1200 + 500) * (1 - 0.153), 2);
   });
 
   it('only counts income for the correct freelancer', async () => {

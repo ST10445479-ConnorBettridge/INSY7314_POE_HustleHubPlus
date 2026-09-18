@@ -20,6 +20,11 @@ router.get('/', authenticate, requireRole('freelancer'), async (req, res, next) 
       .filter((t) => t.status === 'completed' && t.type === 'booking')
       .reduce((sum, t) => sum + t.amount, 0);
 
+    // SECA-style self-employment estimate (see README): 15.3%.
+    const TAX_RATE = 0.153;
+    const taxEstimate = Math.round(totalIncome * TAX_RATE * 100) / 100;
+    const netIncome = Math.round((totalIncome - taxEstimate) * 100) / 100;
+
     const payload = transactions.map((t) => ({
       id: t._id.toString(),
       reference: t.reference,
@@ -37,6 +42,9 @@ router.get('/', authenticate, requireRole('freelancer'), async (req, res, next) 
       data: {
         income: {
           totalIncome,
+          taxRate: TAX_RATE,
+          taxEstimate,
+          netIncome,
           transactionCount: transactions.length,
           transactions: payload,
         },
