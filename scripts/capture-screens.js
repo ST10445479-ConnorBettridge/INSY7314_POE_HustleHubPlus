@@ -37,13 +37,30 @@ function connect(url) {
       send(method, params = {}) {
         return new Promise((res, rej) => {
           const msgId = ++id;
-          pending.set(msgId, { res, rej });
-          ws.send(JSON.stringify({ id: msgId, method, params }));
+          const timer = setTimeout(() => {
+            pending.delete(msgId);
+            rej(new Error('CDP timeout waiting for ' + method));
+          }, 20000);
+          pending.set(msgId, {
+            res: (v) => { clearTimeout(timer); res(v); },
+            rej: (e) => { clearTimeout(timer); rej(e); },
+          });
+          try {
+            ws.send(JSON.stringify({ id: msgId, method, params }));
+          } catch (e) {
+            clearTimeout(timer);
+            pending.delete(msgId);
+            rej(e);
+          }
         });
       },
       close: () => ws.close(),
     });
-    ws.onerror = (e) => reject(new Error('ws error ' + (e && e.message)));
+    ws.onerror = () => reject(new Error('ws error'));
+    ws.onclose = () => {
+      for (const { rej } of pending.values()) rej(new Error('ws closed'));
+      pending.clear();
+    };
     ws.onmessage = (ev) => {
       const msg = JSON.parse(ev.data);
       if (msg.id && pending.has(msg.id)) {
@@ -54,6 +71,27 @@ function connect(url) {
       }
     };
   });
+}
+
+let ws;
+async function withConn(fn) {
+  const run = async () => {
+    ws = await connect(await findPageWs());
+    await ws.send('Page.enable');
+    await ws.send('Runtime.enable');
+    await ws.send('Emulation.setDeviceMetricsOverride', {
+      width: 1280, height: 900, deviceScaleFactor: 1, mobile: false,
+    });
+    return fn();
+  };
+  try {
+    return await run();
+  } catch (e) {
+    console.log('retrying after: ' + e.message);
+    await sleep(1000);
+    try { ws && ws.close(); } catch (_) {}
+    return run();
+  }
 }
 
 async function capture(ws, file) {
@@ -90,58 +128,69 @@ async function login(ws, email) {
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const ws = await connect(await findPageWs());
-  await ws.send('Page.enable');
-  await ws.send('Runtime.enable');
-  await ws.send('Emulation.setDeviceMetricsOverride', {
-    width: 1280, height: 900, deviceScaleFactor: 1, mobile: false,
+  await withConn(async () => {
+    const gotoAndClear = async () => {
+      await navigate(ws, BASE + '/');
+      await evalJs(ws, '(() => { localStorage.clear(); location.reload(); return "ok"; })()');
+      await sleep(1600);
+    };
+
+    const gigId = await evalJs(ws, `(async () => {
+      const res = await fetch('${BASE}/api/gigs');
+      const j = await res.json();
+      const gigs = (j.data && j.data.gigs) || [];
+      return gigs.length ? gigs[0].id : null;
+    })()`);
+    if (!gigId) throw new Error('Could not fetch a gig id — is the server seeded?');
+    console.log('first gig id', gigId);
+
+    await gotoAndClear();
+    await capture(ws, 'web_01_home.png');
+
+    await navigate(ws, BASE + '/login');
+    await capture(ws, 'web_02_login.png');
+
+    await navigate(ws, BASE + '/register');
+    await capture(ws, 'web_03_register.png');
+
+    await navigate(ws, BASE + '/gigs/' + gigId);
+    await capture(ws, 'web_04_gig_detail.png');
+
+    await navigate(ws, BASE + '/does-not-exist');
+    await capture(ws, 'web_09_404.png');
+
+    await navigate(ws, BASE + '/');
+    const alex = await login(ws, 'alex@hustlehub.demo');
+    if (alex !== 'ok') throw new Error('alex login: ' + alex);
+    await navigate(ws, BASE + '/dashboard');
+    await capture(ws, 'web_05_client_dashboard.png');
+
+    await navigate(ws, BASE + '/');
+    const zane = await login(ws, 'zane@hustlehub.demo');
+    if (zane !== 'ok') throw new Error('zane login: ' + zane);
+    await navigate(ws, BASE + '/dashboard/freelancer');
+    await capture(ws, 'web_06_freelancer_dashboard.png');
+
+    await navigate(ws, BASE + '/dashboard/new-gig');
+    await capture(ws, 'web_07_gig_form.png');
+
+    await navigate(ws, BASE + '/dashboard/income');
+    await capture(ws, 'web_08_income.png');
+
+    await navigate(ws, BASE + '/');
+    await evalJs(ws, `(() => {
+      const input = document.querySelector('.search-box input');
+      if (input) {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, 'seo');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      return 'ok';
+    })()`);
+    await sleep(1400);
+    await capture(ws, 'web_10_search.png');
+
+    ws.close();
+    console.log('DONE');
   });
-
-  await navigate(ws, BASE + '/');
-  await sleep(600);
-
-  const gigId = await evalJs(ws, `(async () => {
-    const res = await fetch('${BASE}/api/gigs');
-    const j = await res.json();
-    const gigs = (j.data && j.data.gigs) || [];
-    return gigs.length ? gigs[0].id : null;
-  })()`);
-  if (!gigId) throw new Error('Could not fetch a gig id — is the server seeded?');
-  console.log('first gig id', gigId);
-
-  await navigate(ws, BASE + '/');
-  await capture(ws, 'web_01_home.png');
-
-  await navigate(ws, BASE + '/login');
-  await capture(ws, 'web_02_login.png');
-
-  await navigate(ws, BASE + '/register');
-  await capture(ws, 'web_03_register.png');
-
-  await navigate(ws, BASE + '/gigs/' + gigId);
-  await capture(ws, 'web_04_gig_detail.png');
-
-  await navigate(ws, BASE + '/does-not-exist');
-  await capture(ws, 'web_09_404.png');
-
-  await navigate(ws, BASE + '/');
-  const alex = await login(ws, 'alex@hustlehub.demo');
-  if (alex !== 'ok') throw new Error('alex login: ' + alex);
-  await navigate(ws, BASE + '/dashboard');
-  await capture(ws, 'web_05_client_dashboard.png');
-
-  await navigate(ws, BASE + '/');
-  const zane = await login(ws, 'zane@hustlehub.demo');
-  if (zane !== 'ok') throw new Error('zane login: ' + zane);
-  await navigate(ws, BASE + '/dashboard/freelancer');
-  await capture(ws, 'web_06_freelancer_dashboard.png');
-
-  await navigate(ws, BASE + '/dashboard/gigs/new');
-  await capture(ws, 'web_07_gig_form.png');
-
-  await navigate(ws, BASE + '/dashboard/income');
-  await capture(ws, 'web_08_income.png');
-
-  ws.close();
-  console.log('DONE');
 })().catch((e) => { console.error('ERR', e.message); process.exit(1); });
