@@ -2,6 +2,8 @@ const request = require('supertest');
 const app = require('../src/app');
 const { connectTestDB, cleanDB, disconnectTestDB } = require('./db-test');
 const { registerUser, createGig } = require('./helpers');
+const Transaction = require('../src/models/transaction');
+const Booking = require('../src/models/booking');
 
 beforeAll(async () => {
   await connectTestDB();
@@ -125,7 +127,7 @@ describe('Booking API - GET /api/bookings (role-scoped lists)', () => {
     expect(res.body.data.bookings.length).toBe(2);
   });
 
-  it('blocks viewing another client\'s booking (403)', async () => {
+it('blocks viewing another client\'s booking (403)', async () => {
     const flancer = await registerUser({ name: 'Freelancer Private', email: 'flancer-private@example.com', role: 'freelancer' });
     const gig = await createGig(flancer.token, { title: 'Private Job', category: 'Web', price: 400 });
 
@@ -143,5 +145,39 @@ describe('Booking API - GET /api/bookings (role-scoped lists)', () => {
       .set('Authorization', `Bearer ${clientB.token}`);
 
     expect(viewRes.status).toBe(403);
+});
+
+it('rolls back the booking when transaction creation fails', async () => {
+  const freelancer = await registerUser({
+    name: 'Rollback Freelancer',
+    email: 'rollback-flancer@example.com',
+    role: 'freelancer',
   });
+  const gig = await createGig(freelancer.token, {
+    title: 'Rollback Gig',
+    category: 'Web',
+    price: 250,
+  });
+  const client = await registerUser({
+    name: 'Rollback Client',
+    email: 'rollback-client@example.com',
+    role: 'client',
+  });
+  const originalCreate = Transaction.create;
+  Transaction.create = jest.fn().mockRejectedValue(new Error('simulated transaction failure'));
+  try {
+    const res = await request(app)
+      .post('/api/bookings')
+      .set('Authorization', `Bearer ${client.token}`)
+      .send({ gigId: gig.id });
+    expect(res.status).toBe(500);
+    const remaining = await Booking.findOne({
+      gig: gig.id,
+      client: client.user.id,
+    });
+    expect(remaining).toBeNull();
+  } finally {
+    Transaction.create = originalCreate;
+  }
+});
 });

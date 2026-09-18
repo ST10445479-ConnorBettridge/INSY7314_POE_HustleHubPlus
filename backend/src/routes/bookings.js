@@ -45,8 +45,7 @@ router.post('/', authenticate, requireRole('client'), bookingValidation, async (
       return next(new AppError('You cannot book your own gig', 400));
     }
 
-    // Simulated payment confirmation - always succeeds for the demo.
-    const booking = await Booking.create({
+    booking = await Booking.create({
       gig: gig._id,
       client: req.user.id,
       freelancer: gig.owner,
@@ -54,20 +53,33 @@ router.post('/', authenticate, requireRole('client'), bookingValidation, async (
       amount: gig.price,
       status: 'confirmed',
     });
-
-    const reference = `TXN-${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
-
-    const transaction = await Transaction.create({
-      reference,
-      booking: booking._id,
-      gig: gig._id,
-      client: req.user.id,
-      freelancer: gig.owner,
-      amount: gig.price,
-      type: 'booking',
-      status: 'completed',
-    });
-
+    const reference =
+      `TXN-${Date.now().toString(36).toUpperCase()}` +
+      crypto.randomBytes(3).toString('hex').toUpperCase();
+    let transaction;
+    try {
+      transaction = await Transaction.create({
+        reference,
+        booking: booking._id,
+        gig: gig._id,
+        client: req.user.id,
+        freelancer: gig.owner,
+        amount: gig.price,
+        type: 'booking',
+        status: 'completed',
+      });
+    } catch (transactionError) {
+      // Keep the demo datastore consistent if the simulated payment record fails.
+      try {
+        await Booking.deleteOne({ _id: booking._id });
+      } catch (rollbackError) {
+        logger.error('Booking rollback failed after transaction creation error', {
+          bookingId: booking._id.toString(),
+          error: rollbackError.message,
+        });
+      }
+      throw transactionError;
+    }
     logger.info('Booking created with transaction', {
       bookingId: booking._id.toString(),
       txnId: transaction._id.toString(),
