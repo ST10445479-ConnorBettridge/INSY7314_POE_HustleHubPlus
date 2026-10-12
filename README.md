@@ -148,11 +148,3 @@ npm --prefix frontend test
 npm --prefix frontend run build
 npm --prefix backend run test:newman
 ```
-
-Backend tests use a disposable replica set. Newman launches its own temporary HTTPS app/database and seeds it, leaving normal development data and rate counters untouched. The final requests intentionally demonstrate HTTP 429. Both Newman and the smoke script verify the local certificate.
-
-For smoke testing, keep `npm start` running, seed demo accounts if needed, then run `npm --prefix backend run e2e:smoke`. It checks live role restrictions, gig CRUD, booking/payment, income, headers, injection protection and retained history. Smoke creates retained sample financial records; it does not reset the database.
-
-Frontend tests cover login/registration, search/category filters, gig creation and booking, session expiry and role-protected routes. Backend tests cover authentication, JWT, ownership, bookings, rollback, income, headers, injection, credential types, currency validation and real throttling. Browser checks covered create/edit, search, booking confirmation, both dashboards, earnings and persistence after restarting Node and MongoDB.
-
-**Tooling audit limitation:** backend developer tools report 26 affected entries (20 moderate, 6 high, no critical), rooted in Newman/Jest transitive faker, csv-parse, node-forge and sprintf-js dependencies. Compatible patches were applied where available. This is not a clean full tooling audit; see [backend-tooling-audit.json](docs/evidence/backend-tooling-audit.json). Backend runtime and complete frontend results are zero.
