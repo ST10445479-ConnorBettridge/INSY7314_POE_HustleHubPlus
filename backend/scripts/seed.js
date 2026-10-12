@@ -1,19 +1,11 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const fs = require('fs');
 const { connectDB, disconnectDB, URI_FILE } = require('../src/config/db');
 const User = require('../src/models/user');
 const Gig = require('../src/models/gig');
 const Booking = require('../src/models/booking');
 const Transaction = require('../src/models/transaction');
-const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-
-const generateToken = (user) =>
-  jwt.sign(
-    { id: user.id, email: user.email, role: user.role, name: user.name },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '1h', issuer: 'hustlehub-plus', audience: 'hustlehub-plus-api' }
-  );
 
 const run = async () => {
   // If a server is already running (its URI is recorded), seed THAT live
@@ -23,28 +15,28 @@ const run = async () => {
     liveUri = fs.readFileSync(URI_FILE, 'utf8').trim();
     console.log('Seeding the running server instance...');
   }
-  await connectDB(liveUri || undefined);
+  await connectDB(process.env.MONGODB_URI || liveUri || undefined);
 
-  await Promise.all([
-    User.deleteMany({}),
-    Gig.deleteMany({}),
-    Booking.deleteMany({}),
-    Transaction.deleteMany({}),
-  ]);
+  if (process.env.NODE_ENV === 'production') throw new Error('Demo seeding is for development only');
+  const ensureUser = async data => {
+    const existing = await User.findByEmail(data.email);
+    if (existing) return existing.toSafeObject();
+    return User.createUser(data);
+  };
 
-  const freelancer = await User.createUser({
+  const freelancer = await ensureUser({
     name: 'Zane Designer',
     email: 'zane@hustlehub.demo',
     password: 'DemoPass1!',
     role: 'freelancer',
   });
-  const freelancer2 = await User.createUser({
+  const freelancer2 = await ensureUser({
     name: 'Mia Developer',
     email: 'mia@hustlehub.demo',
     password: 'DemoPass1!',
     role: 'freelancer',
   });
-  const client = await User.createUser({
+  const client = await ensureUser({
     name: 'Alex Client',
     email: 'alex@hustlehub.demo',
     password: 'DemoPass1!',
@@ -77,49 +69,33 @@ const run = async () => {
 
   const gigs = [];
   for (const d of gigsData) {
-    const gig = await Gig.create({ ...d, owner: freelancer.id });
+    const gig = await Gig.findOneAndUpdate({ title: d.title, owner: freelancer.id }, { $setOnInsert: { ...d, owner: freelancer.id } }, { upsert: true, returnDocument: 'after' });
     gigs.push(gig);
   }
 
-  const extraGig = await Gig.create({
+  const extraGig = await Gig.findOneAndUpdate({ title: 'Mobile App UI Design', owner: freelancer2.id }, { $setOnInsert: {
     title: 'Mobile App UI Design',
     description: 'High-fidelity mobile app interfaces in Figma, including design system and clickable prototype.',
     category: 'Design',
     price: 450,
     deliveryDays: 7,
     owner: freelancer2.id,
+  } }, { upsert: true, returnDocument: 'after' });
+
+  const mongoose = require('mongoose');
+  await mongoose.connection.transaction(async session => {
+    const existing = await Booking.findOne({ gig: gigs[0]._id, client: client.id }).session(session);
+    if (existing) return;
+    const [booking] = await Booking.create([{
+      gig: gigs[0]._id, client: client.id, freelancer: freelancer.id,
+      note: 'Need a logo for my coffee brand.', amount: gigs[0].price, status: 'confirmed',
+    }], { session });
+    await Transaction.create([{
+      reference: `TXN-${crypto.randomBytes(12).toString('hex').toUpperCase()}`,
+      booking: booking._id, gig: gigs[0]._id, client: client.id,
+      freelancer: freelancer.id, amount: gigs[0].price, type: 'booking', status: 'completed',
+    }], { session });
   });
-
-  const booking = await Booking.create({
-    gig: gigs[0]._id,
-    client: client.id,
-    freelancer: freelancer.id,
-    note: 'Need a logo for my coffee brand.',
-    amount: gigs[0].price,
-    status: 'confirmed',
-  });
-
-  const ref = `TXN-${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
-
-  await Transaction.create({
-    reference: ref,
-    booking: booking._id,
-    gig: gigs[0]._id,
-    client: client.id,
-    freelancer: freelancer.id,
-    amount: gigs[0].price,
-    type: 'booking',
-    status: 'completed',
-  });
-
-  const summary = {
-    freelancer: freelancer,
-    freelancer2: freelancer2,
-    client: client,
-    gigs: gigs.map((g) => ({ id: g._id.toString(), title: g.title, price: g.price })),
-    extraGig: { id: extraGig._id.toString(), title: extraGig.title, price: extraGig.price },
-    booking: { id: booking._id.toString(), reference: ref, amount: gigs[0].price },
-  };
 
   console.log('==================================================');
   console.log(' HustleHub+ demo data seeded');
@@ -129,18 +105,13 @@ const run = async () => {
   console.log('Client:                     alex@hustlehub.demo');
   console.log('Password for all:           DemoPass1!');
   console.log('--------------------------------------------------');
-  console.log('Client token (env var CLIENT_TOKEN):');
-  console.log(generateToken(client));
-  console.log('--------------------------------------------------');
-  console.log('Freelancer token (env var FREELANCER_TOKEN):');
-  console.log(generateToken(freelancer));
-  console.log('--------------------------------------------------');
-  console.log(`Seeded ${gigs.length + 1} gigs, 1 booking, 1 transaction.`);
+  console.log('Demo accounts and gigs are ready. Existing application data was preserved.');
 
   await disconnectDB();
 };
 
-run().catch((err) => {
-  console.error('Seed failed:', err);
+run().catch(async (err) => {
+  console.error('Seed failed:', err.message);
+  await disconnectDB();
   process.exit(1);
 });

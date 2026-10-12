@@ -1,7 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ quiet: true });
+require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
 
 const app = require('./src/app');
 const logger = require('./src/utils/logger');

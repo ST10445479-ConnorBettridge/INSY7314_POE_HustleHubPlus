@@ -1,1 +1,14 @@
-{"private":true,"scripts":{"seed":"npm --prefix backend run seed","start":"npm --prefix backend start","dev":"npm --prefix backend run dev","e2e:smoke":"npm --prefix backend run e2e:smoke"}}
+{
+  "name": "hustlehub-plus",
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "setup": "npm --prefix backend ci && npm --prefix frontend ci && node scripts/setup-local.js && npm --prefix frontend run build",
+    "start": "node backend/server.js",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
+    "build": "npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed"
+  }
+}

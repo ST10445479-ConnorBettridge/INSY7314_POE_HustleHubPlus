@@ -311,7 +311,7 @@ module.exports = { req, J, sleep, buildLog };
         body: { category: 'Design', price: 5, deliveryDays: 3 },
         test: [
           "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
-          "pm.test('Validation message returned', () => pm.expect(pm.response.json().message).to.include('Title is required'));",
+          "pm.test('Validation message returned', () => pm.expect(pm.response.json().message).to.include('Title must be text'));",
         ],
       }),
       req('POST', '/api/gigs', {
@@ -568,7 +568,7 @@ module.exports = { req, J, sleep, buildLog };
         body: { gigId: { $gt: '' }, note: 'Inject me!', __proto__: { polluted: true } },
         test: [
           "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
-          "pm.test('Injection neutralised (validation error)', () => pm.expect(pm.response.json().message).to.include('A valid gig id is required'));",
+          "pm.test('Injection rejected with a controlled error', () => pm.expect(pm.response.json().message).to.eql('Invalid input field'));",
         ],
       }),
       req('GET', '/api/gigs/000000000000000000000000', {
@@ -578,7 +578,7 @@ module.exports = { req, J, sleep, buildLog };
           "pm.test('Unknown id rejected', () => pm.expect(pm.response.json().status).to.eql('error'));",
         ],
       }),
-      ...Array.from({ length: 8 }, (_, i) =>
+      ...Array.from({ length: 10 }, (_, i) =>
         req('POST', '/api/auth/login', {
           name: `Login - Burn Auth Budget ${i + 1} (401)`,
           body: { email: 'alex@hustlehub.demo', password: 'WrongPass1!' },

@@ -1,6 +1,6 @@
-const BASE = 'https://localhost:3443/api';
+const fetch = require('./https-client');
+const BASE = process.env.API_BASE || 'https://localhost:3443/api';
 const TLS = { headers: { 'User-Agent': 'hh-e2e' } };
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let failures = 0;
 let passes = 0;
@@ -30,7 +30,7 @@ const apiCall = async (path, { method = 'GET', token, body } = {}) => {
 
   // 2. Public gig listing + category filter
   const gigs = await apiCall('/gigs');
-  step('GET /api/gigs public', gigs.status === 200 && gigs.json.count === 4, `count=${gigs.json.count}`);
+  step('GET /api/gigs public', gigs.status === 200 && gigs.json.count >= 4, `count=${gigs.json.count}`);
   const filtered = await apiCall('/gigs?category=Design');
   step('GET /api/gigs?category=Design', filtered.status === 200 && filtered.json.data.gigs.every((g) => g.category === 'Design'),
     `${filtered.json.count} design gigs`);
@@ -110,19 +110,24 @@ const apiCall = async (path, { method = 'GET', token, body } = {}) => {
 
   // 19. NoSQL injection neutralised
   const injection = await apiCall('/auth/login', { method: 'POST', body: { email: { $gt: '' }, password: { $gt: '' } } });
-  step('NoSQL $gt injection on login rejected', injection.status !== 200 || !injection.json.token);
+  step('NoSQL $gt injection on login rejected', injection.status === 400 && injection.json.status === 'error');
 
   // 20. Security headers (CSP)
   const headersRes = await fetch('https://localhost:3443/login', { ...TLS });
   const csp = headersRes.headers.get('content-security-policy') || '';
   step('CSP header present on SPA', csp.includes("default-src 'self'"), 'CSP present');
-  step('nosniff + x-powered-by hidden', (headersRes.headers.get('x-content-type-options') || '').toLowerCase() === 'nosniff');
+  step('nosniff + x-powered-by hidden', headersRes.headers.get('x-content-type-options') === 'nosniff' && headersRes.headers.get('x-powered-by') === null);
 
   // 21. Freelancer deletes own gig
   const del = await apiCall(`/gigs/${gigId}`, { method: 'DELETE', token: flToken });
   step('freelancer deletes own gig', del.status === 200);
   const after = await apiCall(`/gigs/${gigId}`);
   step('deleted gig no longer listed (404)', after.status === 404);
+  const retainedIncome = await apiCall('/income', { token: flToken });
+  step('deleting a listing retains earnings', retainedIncome.status === 200 && retainedIncome.json.data.income.totalIncome === income.json.data.income.totalIncome);
+  const retainedBooking = await apiCall(`/bookings/${booking.json.data.booking.id}`, { token: clientToken });
+  step('deleting a listing retains booking history', retainedBooking.status === 200);
+  if (xssGig.status === 201) await apiCall(`/gigs/${xssGig.json.data.gig.id}`, { method: 'DELETE', token: flToken });
 
   // 22. Booking on a deleted/nonexistent gig fails
   const ghostBooking = await apiCall('/bookings', { method: 'POST', token: clientToken, body: { gigId: '000000000000000000000000' } });

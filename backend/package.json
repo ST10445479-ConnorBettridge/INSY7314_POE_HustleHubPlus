@@ -5,41 +5,50 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "node --watch server.js",
     "seed": "node scripts/seed.js",
     "e2e:smoke": "node scripts/e2e-smoke.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "test:newman": "newman run \"../HustleHub+ Postman Collection.json\" --insecure --reporters cli"
+    "test:newman": "node scripts/run-acceptance.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-mongo-sanitize": "^2.2.0",
-    "express-rate-limit": "^7.4.1",
-    "express-validator": "^7.3.0",
-    "helmet": "^7.2.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^9.10.1",
-    "morgan": "^1.10.0",
-    "node-forge": "^1.4.0",
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.11.1",
+    "morgan": "^1.12.1",
     "winston": "^3.19.0",
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "mongodb-memory-server": "^11.2.0",
-    "newman": "^6.2.2",
-    "nodemon": "^3.1.4",
-    "supertest": "^7.0.0"
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
+    "newman": "^6.2.3",
+    "supertest": "^7.3.1"
   },
   "directories": {
     "test": "tests"
   },
-  "type": "commonjs"
+  "type": "commonjs",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "overrides": {
+    "lodash": "4.18.1",
+    "handlebars": "4.7.10",
+    "qs": "6.16.0",
+    "underscore": "1.13.8",
+    "flatted": "3.4.4",
+    "uuid": "11.1.1",
+    "jose": "4.15.9"
+  }
 }
