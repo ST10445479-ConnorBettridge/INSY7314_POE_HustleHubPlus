@@ -3,7 +3,7 @@ const Gig = require('../models/gig');
 const User = require('../models/user');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/roles');
-const { gigValidation, gigIdParamValidation } = require('../middleware/validate');
+const { gigValidation, gigIdParamValidation, browseValidation } = require('../middleware/validate');
 const { AppError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 
@@ -17,7 +17,7 @@ const loadOwnerNames = async (gigs) => {
 };
 
 // Browse all active gigs (public).
-router.get('/', async (req, res, next) => {
+router.get('/', browseValidation, async (req, res, next) => {
   try {
     const filter = { status: 'active' };
     if (req.query.category && typeof req.query.category === 'string') {

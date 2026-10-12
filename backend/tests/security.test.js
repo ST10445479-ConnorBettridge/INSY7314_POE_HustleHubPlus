@@ -235,8 +235,8 @@ describe('Security hardening - NoSQL injection resistance', () => {
 
   it('neutralises query string operator injection', async () => {
     const res = await request(app).get('/api/gigs?price[$gte]=0&category[$ne]=x');
-    expect(res.status).toBe(200);
-    expect(res.body.status).toBe('success');
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe('error');
   });
 });
 

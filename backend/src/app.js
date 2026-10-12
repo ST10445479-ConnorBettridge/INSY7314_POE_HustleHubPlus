@@ -5,8 +5,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const authRoutes = require('./routes/auth');
 const gigRoutes = require('./routes/gigs');
@@ -17,7 +16,7 @@ const { sanitizeInput } = require('./middleware/sanitize');
 
 const app = express();
 
-const isTest = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+const isTest = (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined) && process.env.TEST_RATE_LIMITS !== '1';
 
 const limiter = isTest
   ? (req, res, next) => next()
@@ -38,6 +37,7 @@ const authLimiter = isTest
   : rateLimit({
       windowMs: 15 * 60 * 1000,
       limit: 10,
+      skipSuccessfulRequests: true,
       standardHeaders: true,
       legacyHeaders: false,
       message: {
@@ -91,18 +91,23 @@ const corsOptions = {
   origin(origin, callback) {
     if (!origin) return callback(null, true);
     if (configuredOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS origin not allowed'));
+    return callback(null, false);
   },
 };
 
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  if (origin && origin !== `${req.protocol}://${req.get('host')}` && !configuredOrigins.includes(origin)) {
+    return res.status(403).json({ status: 'error', statusCode: 403, message: 'Origin not allowed' });
+  }
+  cors(corsOptions)(req, res, next);
+});
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-if (!isTest) app.use(morgan('short'));
+if (process.env.NODE_ENV !== 'test') app.use(morgan('short'));
 
 // Sanitisation: strip NoSQL operator injection and HTML/script payloads.
-app.use(mongoSanitize());
 app.use(sanitizeInput);
 
 app.use((err, req, res, next) => {
@@ -126,7 +131,7 @@ app.use((err, req, res, next) => {
 app.use('/api', limiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-app.use('/api/bookings', bookingLimiter);
+app.post('/api/bookings', bookingLimiter);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'HustleHub+ API is running' });

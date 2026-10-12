@@ -26,7 +26,10 @@ const request = async (path, { method = 'GET', body, auth = true } = {}) => {
   }
 
   if (!res.ok) {
-    throw new Error(payload.message || `Request failed with status ${res.status}`);
+    if (res.status === 401 && auth) window.dispatchEvent(new Event('hustlehub:session-expired'));
+    const error = new Error(payload.message || `Request failed with status ${res.status}`);
+    error.status = res.status;
+    throw error;
   }
 
   return payload;

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { AppError } = require('./errorHandler');
 const logger = require('../utils/logger');
+const User = require('../models/user');
 
 const JWT_VERIFY_OPTIONS = {
   algorithms: ['HS256'],
@@ -8,7 +9,7 @@ const JWT_VERIFY_OPTIONS = {
   audience: 'hustlehub-plus-api',
 };
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -19,9 +20,15 @@ const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET, JWT_VERIFY_OPTIONS);
-    req.user = decoded;
+    if (typeof decoded.id !== 'string' || !/^[a-f\d]{24}$/i.test(decoded.id)) {
+      return next(new AppError('Invalid token. Access denied.', 401));
+    }
+    const user = await User.findById(decoded.id);
+    if (!user) return next(new AppError('Account no longer available. Please login again.', 401));
+    req.user = user.toSafeObject();
     next();
   } catch (err) {
+    if (!['TokenExpiredError', 'JsonWebTokenError', 'NotBeforeError'].includes(err.name)) return next(err);
     logger.warn('Invalid JWT token attempt', {
       ip: req.ip,
       url: req.originalUrl,

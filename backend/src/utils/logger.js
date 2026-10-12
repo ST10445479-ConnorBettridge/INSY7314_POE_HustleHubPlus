@@ -26,7 +26,7 @@ const logger = winston.createLogger({
   ],
 });
 
-if (process.env.NODE_ENV !== 'production') {
+if (!['production', 'test'].includes(process.env.NODE_ENV)) {
   logger.add(
     new winston.transports.Console({
       format: winston.format.combine(

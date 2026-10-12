@@ -20,7 +20,8 @@ export const renderWithProviders = (ui, { route = '/', path } = {}) => {
 
 export const seedAuthenticatedUser = ({ name = 'Zane Designer', email = 'zane@example.com', role = 'freelancer' } = {}) => {
   const user = { id: 'user-1', name, email, role };
-  localStorage.setItem('hustlehub_token', 'test-token');
+  const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }));
+  localStorage.setItem('hustlehub_token', `test.${payload}.signature`);
   localStorage.setItem('hustlehub_user', JSON.stringify(user));
   return user;
 };

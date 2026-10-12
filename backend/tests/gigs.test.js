@@ -57,6 +57,11 @@ describe('Gig API - POST /api/gigs (create)', () => {
 });
 
 describe('Gig API - GET /api/gigs (browse)', () => {
+  it.each(['/api/gigs?category=Design&category=Marketing', '/api/gigs?query=logo&query=web'])('rejects repeated query values: %s', async url => {
+    const res = await request(app).get(url);
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe('error');
+  });
   it('returns all active gigs publicly', async () => {
     const { token } = await registerUser({ name: 'Freelancer Browse', email: 'flancer-browse@example.com', role: 'freelancer' });
     await createGig(token, { title: 'Web Development', category: 'Web', price: 500 });
