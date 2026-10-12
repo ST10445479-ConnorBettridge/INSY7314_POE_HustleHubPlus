@@ -1,0 +1,386 @@
+
+> hustlehub-plus-backend@1.0.0 test:newman
+> node scripts/run-acceptance.js
+
+(node:29348) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[32minfo[39m: MongoDB connected successfully {"service":"hustlehub-plus","timestamp":"2026-10-12 15:12:36"}
+newman
+
+HustleHub+ API
+
+□ Health
+└ Health Check
+  GET https://127.0.0.1:57529/api/health 127.0.0.1 - GET /api/health HTTP/1.1 200 58 - 2.844 ms
+[200 OK, 1.05kB, 28ms]
+  √  Status code is 200
+  √  API reports success
+
+□ Auth - Register
+└ Register - Freelancer (Success)
+  POST https://127.0.0.1:57529/api/auth/register [32minfo[39m: User created {"role":"freelancer","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:37","userId":"6accdcc50395e408285be062"}
+[32minfo[39m: User registered successfully {"email":"postman@hustlehub.demo","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:37","userId":"6accdcc50395e408285be062"}
+127.0.0.1 - POST /api/auth/register HTTP/1.1 201 587 - 212.515 ms
+[201 Created, 1.58kB, 222ms]
+  √  Status code is 201
+  √  Freelancer token is generated
+
+└ Register - Client (Success)
+  POST https://127.0.0.1:57529/api/auth/register [32minfo[39m: User created {"role":"client","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:37","userId":"6accdcc50395e408285be063"}
+[32minfo[39m: User registered successfully {"email":"postmanc@hustlehub.demo","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:37","userId":"6accdcc50395e408285be063"}
+127.0.0.1 - POST /api/auth/register HTTP/1.1 201 571 - 194.889 ms
+[201 Created, 1.57kB, 197ms]
+  √  Status code is 201
+  √  Client token is generated
+
+└ Register - Duplicate Email (Error)
+  POST https://127.0.0.1:57529/api/auth/register 127.0.0.1 - POST /api/auth/register HTTP/1.1 409 85 - 2.467 ms
+[409 Conflict, 1.08kB, 5ms]
+  √  Status code is 409
+  √  Duplicate email is rejected
+
+└ Register - Validation Error (Bad Input)
+  POST https://127.0.0.1:57529/api/auth/register 127.0.0.1 - POST /api/auth/register HTTP/1.1 400 317 - 0.836 ms
+[400 Bad Request, 1.32kB, 3ms]
+  √  Status code is 400
+  √  Validation message returned
+
+└ Register - Admin Role (Rejected)
+  POST https://127.0.0.1:57529/api/auth/register 127.0.0.1 - POST /api/auth/register HTTP/1.1 400 87 - 0.541 ms
+[400 Bad Request, 1.09kB, 3ms]
+  √  Status code is 400
+  √  Admin role is rejected
+
+□ Auth - Login
+└ Login - Client (Success)
+  POST https://127.0.0.1:57529/api/auth/login [32minfo[39m: User authenticated {"role":"client","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:38","userId":"6accdcc49fa781b15039d442"}
+[32minfo[39m: User logged in {"email":"alex@hustlehub.demo","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:38","userId":"6accdcc49fa781b15039d442"}
+127.0.0.1 - POST /api/auth/login HTTP/1.1 200 543 - 186.212 ms
+[200 OK, 1.53kB, 188ms]
+  √  Status code is 200
+  √  Client token generated
+
+└ Login - Freelancer (Success)
+  POST https://127.0.0.1:57529/api/auth/login [32minfo[39m: User authenticated {"role":"freelancer","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:38","userId":"6accdcc49fa781b15039d440"}
+[32minfo[39m: User logged in {"email":"zane@hustlehub.demo","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:38","userId":"6accdcc49fa781b15039d440"}
+127.0.0.1 - POST /api/auth/login HTTP/1.1 200 557 - 187.699 ms
+[200 OK, 1.55kB, 190ms]
+  √  Status code is 200
+  √  Freelancer token generated
+
+└ Login - Wrong Password (Error)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 185.767 ms
+[401 Unauthorized, 1.07kB, 188ms]
+  √  Status code is 401
+  √  Rejects wrong password
+
+└ Login - Non-Existent User (Error)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 365.867 ms
+[401 Unauthorized, 1.07kB, 369ms]
+  √  Status code is 401
+  √  No token issued
+
+└ Login - Malformed JSON (Error)
+  POST https://127.0.0.1:57529/api/auth/login [400 Bad Request, 971B, 2ms]
+  √  Status code is 400
+  √  Controlled JSON parse error returned
+
+└ Login - Oversized Body (Error)
+  POST https://127.0.0.1:57529/api/auth/login [413 Payload Too Large, 979B, 2ms]
+  √  Status code is 413
+  √  Body size limit enforced
+
+□ Gigs - Marketplace CRUD & RBAC
+└ List Gigs (Public)
+  GET https://127.0.0.1:57529/api/gigs 127.0.0.1 - GET /api/gigs HTTP/1.1 200 1644 - 3.981 ms
+[200 OK, 2.64kB, 6ms]
+  √  Status code is 200
+  √  Returns a gig array
+
+└ List Gigs - Category Filter
+  GET https://127.0.0.1:57529/api/gigs?category=Design 127.0.0.1 - GET /api/gigs?category=Design HTTP/1.1 200 829 - 2.505 ms
+[200 OK, 1.82kB, 4ms]
+  √  Status code is 200
+  √  Only Design gigs returned
+
+└ Get Gig Detail (Public)
+  GET https://127.0.0.1:57529/api/gigs/6accdcc53a78aa9063e19e8c 127.0.0.1 - GET /api/gigs/6accdcc53a78aa9063e19e8c HTTP/1.1 200 419 - 2.503 ms
+[200 OK, 1.41kB, 4ms]
+  √  Status code is 200
+  √  Gig has an id
+
+└ Create Gig - Freelancer (Success)
+  POST https://127.0.0.1:57529/api/gigs [32minfo[39m: Gig created {"gigId":"6accdcc80395e408285be064","owner":"6accdcc49fa781b15039d440","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:40"}
+127.0.0.1 - POST /api/gigs HTTP/1.1 201 427 - 4.456 ms
+[201 Created, 1.43kB, 7ms]
+  √  Status code is 201
+  √  Gig created
+
+└ Create Gig - Client (Rejected)
+  POST https://127.0.0.1:57529/api/gigs 127.0.0.1 - POST /api/gigs HTTP/1.1 403 109 - 1.533 ms
+[403 Forbidden, 1.11kB, 3ms]
+  √  Status code is 403
+  √  RBAC blocks clients
+
+└ Create Gig - No Token (Error)
+  POST https://127.0.0.1:57529/api/gigs 127.0.0.1 - POST /api/gigs HTTP/1.1 401 81 - 0.233 ms
+[401 Unauthorized, 1.08kB, 2ms]
+  √  Status code is 401
+  √  Auth required
+
+└ Create Gig - Validation Error (Bad Input)
+  POST https://127.0.0.1:57529/api/gigs 127.0.0.1 - POST /api/gigs HTTP/1.1 400 92 - 1.696 ms
+[400 Bad Request, 1.09kB, 4ms]
+  √  Status code is 400
+  √  Validation message returned
+
+└ Create Gig - XSS Stripped
+  POST https://127.0.0.1:57529/api/gigs [32minfo[39m: Gig created {"gigId":"6accdcc80395e408285be065","owner":"6accdcc49fa781b15039d440","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:40"}
+127.0.0.1 - POST /api/gigs HTTP/1.1 201 392 - 4.725 ms
+[201 Created, 1.39kB, 6ms]
+  √  Status code is 201
+  √  Script tags removed from title
+  √  Image tags removed from description
+
+└ Update Gig - Owner (Success)
+  PUT https://127.0.0.1:57529/api/gigs/6accdcc80395e408285be064 [32minfo[39m: Gig updated {"gigId":"6accdcc80395e408285be064","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:40"}
+127.0.0.1 - PUT /api/gigs/6accdcc80395e408285be064 HTTP/1.1 200 430 - 5.870 ms
+[200 OK, 1.42kB, 8ms]
+  √  Status code is 200
+  √  Price updated
+
+└ Update Gig - Non-Owner (Rejected)
+  PUT https://127.0.0.1:57529/api/gigs/6accdcc80395e408285be064 127.0.0.1 - PUT /api/gigs/6accdcc80395e408285be064 HTTP/1.1 403 109 - 1.612 ms
+[403 Forbidden, 1.11kB, 4ms]
+  √  Status code is 403
+  √  Ownership enforced
+
+└ My Gigs - Freelancer (Success)
+  GET https://127.0.0.1:57529/api/gigs/mine 127.0.0.1 - GET /api/gigs/mine HTTP/1.1 200 1960 - 3.224 ms
+[200 OK, 2.96kB, 5ms]
+  √  Status code is 200
+  √  Returns own gigs
+
+└ My Gigs - Client (Rejected)
+  GET https://127.0.0.1:57529/api/gigs/mine 127.0.0.1 - GET /api/gigs/mine HTTP/1.1 403 109 - 1.359 ms
+[403 Forbidden, 1.11kB, 3ms]
+  √  Status code is 403
+  √  RBAC blocks client
+
+□ Bookings - Simulated Payments
+└ Create Booking - Client (Success)
+  POST https://127.0.0.1:57529/api/bookings [32minfo[39m: Booking created with transaction {"bookingId":"6accdcc80395e408285be066","client":"6accdcc49fa781b15039d442","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:40","txnId":"6accdcc80395e408285be067"}
+127.0.0.1 - POST /api/bookings HTTP/1.1 201 913 - 12.845 ms
+[201 Created, 1.91kB, 15ms]
+  √  Status code is 201
+  √  Booking confirmed
+  √  Transaction reference created
+
+└ Create Booking - Freelancer (Rejected)
+  POST https://127.0.0.1:57529/api/bookings 127.0.0.1 - POST /api/bookings HTTP/1.1 403 109 - 1.450 ms
+[403 Forbidden, 1.11kB, 3ms]
+  √  Status code is 403
+  √  RBAC blocks freelancer booking
+
+└ Create Booking - No Token (Error)
+  POST https://127.0.0.1:57529/api/bookings 127.0.0.1 - POST /api/bookings HTTP/1.1 401 81 - 0.214 ms
+[401 Unauthorized, 1.08kB, 2ms]
+  √  Status code is 401
+  √  Auth required
+
+└ Create Booking - Missing Gig (Error)
+  POST https://127.0.0.1:57529/api/bookings 127.0.0.1 - POST /api/bookings HTTP/1.1 404 84 - 2.998 ms
+[404 Not Found, 1.08kB, 4ms]
+  √  Status code is 404
+  √  Missing gig rejected
+
+└ List My Bookings - Client (Success)
+  GET https://127.0.0.1:57529/api/bookings 127.0.0.1 - GET /api/bookings HTTP/1.1 200 993 - 3.643 ms
+[200 OK, 1.99kB, 5ms]
+  √  Status code is 200
+  √  Client bookings include the new one
+
+└ List Bookings on My Gigs - Freelancer (Success)
+  GET https://127.0.0.1:57529/api/bookings 127.0.0.1 - GET /api/bookings HTTP/1.1 200 993 - 4.031 ms
+[200 OK, 1.99kB, 6ms]
+  √  Status code is 200
+  √  Freelancer sees bookings on their gigs
+
+└ Get Booking Detail
+  GET https://127.0.0.1:57529/api/bookings/6accdcc80395e408285be066 127.0.0.1 - GET /api/bookings/6accdcc80395e408285be066 HTTP/1.1 200 523 - 4.130 ms
+[200 OK, 1.52kB, 6ms]
+  √  Status code is 200
+  √  Booking matches reference
+
+□ Income - Freelancer Earnings
+└ Get Income - Freelancer (Success)
+  GET https://127.0.0.1:57529/api/income 127.0.0.1 - GET /api/income HTTP/1.1 200 909 - 4.298 ms
+[200 OK, 1.9kB, 6ms]
+  √  Status code is 200
+  √  Aggregated income returned
+  √  Includes postman transaction
+
+└ Get Income - Client (Rejected)
+  GET https://127.0.0.1:57529/api/income [403 Forbidden, 1.11kB, 4ms]
+127.0.0.1 - GET /api/income HTTP/1.1 403 109 - 1.490 ms
+  √  Status code is 403
+  √  RBAC blocks clients
+
+└ Get Income - No Token (Error)
+  GET https://127.0.0.1:57529/api/income [401 Unauthorized, 1.08kB, 1ms]
+127.0.0.1 - GET /api/income HTTP/1.1 401 81 - 0.240 ms
+  √  Status code is 401
+  √  Auth required
+
+□ Cleanup - Gig Delete
+└ Delete Gig - Non-Owner (Rejected)
+  DELETE https://127.0.0.1:57529/api/gigs/6accdcc80395e408285be064 [403 Forbidden, 1.11kB, 3ms]
+127.0.0.1 - DELETE /api/gigs/6accdcc80395e408285be064 HTTP/1.1 403 109 - 1.632 ms
+  √  Status code is 403
+  √  Ownership enforced on delete
+
+└ Delete Gig - Owner (Success)
+  DELETE https://127.0.0.1:57529/api/gigs/6accdcc80395e408285be064 [32minfo[39m: Gig deleted {"gigId":"6accdcc80395e408285be064","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:41"}
+127.0.0.1 - DELETE /api/gigs/6accdcc80395e408285be064 HTTP/1.1 200 98 - 4.940 ms
+[200 OK, 1.09kB, 7ms]
+  √  Status code is 200
+  √  Gig deleted
+
+└ Deleted Gig No Longer Listed (Error)
+  GET https://127.0.0.1:57529/api/gigs/6accdcc80395e408285be064 127.0.0.1 - GET /api/gigs/6accdcc80395e408285be064 HTTP/1.1 404 61 - 1.227 ms
+[404 Not Found, 1.06kB, 3ms]
+  √  Status code is 404
+  √  Gone
+
+□ Protected Routes - JWT
+└ Profile - Authenticated (Success)
+  GET https://127.0.0.1:57529/api/auth/profile 127.0.0.1 - GET /api/auth/profile HTTP/1.1 200 176 - 1.581 ms
+[200 OK, 1.17kB, 3ms]
+  √  Status code is 200
+  √  Returns user from token
+
+└ Profile - No Token (Error)
+  GET https://127.0.0.1:57529/api/auth/profile [401 Unauthorized, 1.08kB, 2ms]
+127.0.0.1 - GET /api/auth/profile HTTP/1.1 401 81 - 0.233 ms
+  √  Status code is 401
+  √  Rejects missing token
+
+└ Profile - Invalid Token (Error)
+  GET https://127.0.0.1:57529/api/auth/profile [33mwarn[39m: Invalid JWT token attempt {"ip":"127.0.0.1","service":"hustlehub-plus","timestamp":"2026-10-12 15:12:42","url":"/api/auth/profile"}
+[401 Unauthorized, 1.08kB, 2ms]
+127.0.0.1 - GET /api/auth/profile HTTP/1.1 401 77 - 0.473 ms
+  √  Status code is 401
+  √  Rejects garbage token
+
+□ Security & Hardening
+└ Security Headers - SPA (CSP / nosniff)
+  GET https://127.0.0.1:57529/ 127.0.0.1 - GET / HTTP/1.1 200 516 - 1.400 ms
+[200 OK, 1.49kB, 3ms]
+  √  CSP frame-ancestors denies embedding
+  √  nosniff header set
+  √  x-powered-by hidden
+
+└ 404 - Unknown API Route (Error)
+  GET https://127.0.0.1:57529/api/does-not-exist 127.0.0.1 - GET /api/does-not-exist HTTP/1.1 404 83 - 0.650 ms
+[404 Not Found, 1.08kB, 3ms]
+  √  Status code is 404
+  √  Controlled 404 JSON
+
+└ NoSQL Injection - Booking (Neutralised)
+  POST https://127.0.0.1:57529/api/bookings 127.0.0.1 - POST /api/bookings HTTP/1.1 400 67 - 0.160 ms
+[400 Bad Request, 970B, 2ms]
+  √  Status code is 400
+  √  Injection rejected with a controlled error
+
+└ NoSQL Injection - Gig Query (Neutralised)
+  GET https://127.0.0.1:57529/api/gigs/000000000000000000000000 127.0.0.1 - GET /api/gigs/000000000000000000000000 HTTP/1.1 404 61 - 1.217 ms
+[404 Not Found, 1.06kB, 3ms]
+  √  Status code is 404
+  √  Unknown id rejected
+
+└ Login - Burn Auth Budget 1 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 176.305 ms
+[401 Unauthorized, 1.07kB, 178ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 2 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 176.144 ms
+[401 Unauthorized, 1.07kB, 179ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 3 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 172.046 ms
+[401 Unauthorized, 1.07kB, 174ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 4 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 177.102 ms
+[401 Unauthorized, 1.07kB, 179ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 5 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 401 73 - 169.718 ms
+[401 Unauthorized, 1.07kB, 171ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 6 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 429 105 - 0.249 ms
+[429 Too Many Requests, 1.13kB, 2ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 7 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 429 105 - 0.173 ms
+[429 Too Many Requests, 1.13kB, 2ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 8 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 429 105 - 0.156 ms
+[429 Too Many Requests, 1.13kB, 2ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 9 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 429 105 - 0.160 ms
+[429 Too Many Requests, 1.13kB, 2ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Login - Burn Auth Budget 10 (401)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 429 105 - 0.135 ms
+[429 Too Many Requests, 1.13kB, 2ms]
+  √  Status code is 401 or 429
+  √  Attempt handled
+
+└ Rate Limit - Login Throttled (429)
+  POST https://127.0.0.1:57529/api/auth/login 127.0.0.1 - POST /api/auth/login HTTP/1.1 429 105 - 0.139 ms
+[429 Too Many Requests, 1.13kB, 2ms]
+  √  Login requests are throttled with HTTP 429
+  √  Throttle message returned
+
+┌─────────────────────────┬───────────────────┬──────────────────┐
+│                         │          executed │           failed │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              iterations │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│                requests │                55 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│            test-scripts │                55 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│      prerequest-scripts │                 0 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              assertions │               114 │                0 │
+├─────────────────────────┴───────────────────┴──────────────────┤
+│ total run duration: 7.1s                                       │
+├────────────────────────────────────────────────────────────────┤
+│ total data received: 16.81kB (approx)                          │
+├────────────────────────────────────────────────────────────────┤
+│ average response time: 44ms [min: 1ms, max: 369ms, s.d.: 83ms] │
+└────────────────────────────────────────────────────────────────┘
+Newman verified: 55 requests, 114 assertions, zero failures.

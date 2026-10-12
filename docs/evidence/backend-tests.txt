@@ -1,0 +1,11 @@
+
+> hustlehub-plus-backend@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --runInBand --silent
+
+(node:528) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 7 passed, 7 total
+Tests:       78 passed, 78 total
+Snapshots:   0 total
+Time:        6.567 s, estimated 8 s

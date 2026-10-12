@@ -1,0 +1,33 @@
+> hustlehub-plus-backend@1.0.0 e2e:smoke
+> node scripts/e2e-smoke.js
+
+  PASS  GET /api/health returns 200
+  PASS  GET /api/gigs public  - count=6
+  PASS  GET /api/gigs?category=Design  - 3 design gigs
+  PASS  login alex (client)  - client token received
+  PASS  login zane (freelancer)  - freelancer token received
+  PASS  GET /api/auth/profile (client)
+  PASS  login rejected with wrong password
+  PASS  client blocked from GET /gigs/mine (403)  - status=403
+  PASS  client blocked from POST /gigs (403)
+  PASS  GET /gigs/mine without token (401)
+  PASS  freelancer creates gig  - id=6accd8c12c93a98dd0b9b6a6
+  PASS  GET /gigs/:id public detail
+  PASS  freelancer edits own gig
+  PASS  client blocked from editing another user's gig (403)
+  PASS  client books gig (booking + transaction)  - ref=TXN-MV598ZST2825B1B9C426A6B3 status=confirmed
+  PASS  client lists bookings
+  PASS  freelancer lists bookings on own gigs
+  PASS  freelancer income includes new txn  - txns=5 total=1249.75
+  PASS  client blocked from GET /income (403)
+  PASS  XSS stripped from created gig
+  PASS  NoSQL $gt injection on login rejected
+  PASS  CSP header present on SPA  - CSP present
+  PASS  nosniff + x-powered-by hidden
+  PASS  freelancer deletes own gig
+  PASS  deleted gig no longer listed (404)
+  PASS  deleting a listing retains earnings
+  PASS  deleting a listing retains booking history
+  PASS  booking on missing gig rejected (404/400)  - status=404
+
+E2E result: 28 passed, 0 failed

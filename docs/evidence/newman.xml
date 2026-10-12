@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="HustleHub+ API" tests="55" time="2.429">
+  <testsuite name="Health / Health Check" id="dea1b444-e4e4-44d2-984f-d25ba203d922" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.028">
+    <testcase name="Status code is 200" time="0.028" classname="HealthHealthCheck"/>
+    <testcase name="API reports success" time="0.028" classname="HealthHealthCheck"/>
+  </testsuite>
+  <testsuite name="Auth - Register / Register - Freelancer (Success)" id="19747e9e-3b4c-4bc6-bae5-de9332c66773" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.222">
+    <testcase name="Status code is 201" time="0.222" classname="AuthRegisterRegisterFreelancerSuccess"/>
+    <testcase name="Freelancer token is generated" time="0.222" classname="AuthRegisterRegisterFreelancerSuccess"/>
+  </testsuite>
+  <testsuite name="Auth - Register / Register - Client (Success)" id="d21bf229-e255-44d9-a480-16e1d4266204" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.197">
+    <testcase name="Status code is 201" time="0.197" classname="AuthRegisterRegisterClientSuccess"/>
+    <testcase name="Client token is generated" time="0.197" classname="AuthRegisterRegisterClientSuccess"/>
+  </testsuite>
+  <testsuite name="Auth - Register / Register - Duplicate Email (Error)" id="3f0c5b6d-4d98-44c1-addb-7c41520e7b1c" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Status code is 409" time="0.005" classname="AuthRegisterRegisterDuplicateEmailError"/>
+    <testcase name="Duplicate email is rejected" time="0.005" classname="AuthRegisterRegisterDuplicateEmailError"/>
+  </testsuite>
+  <testsuite name="Auth - Register / Register - Validation Error (Bad Input)" id="00490fad-59e3-45bf-853d-126283e23a9d" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 400" time="0.003" classname="AuthRegisterRegisterValidationErrorBadInput"/>
+    <testcase name="Validation message returned" time="0.003" classname="AuthRegisterRegisterValidationErrorBadInput"/>
+  </testsuite>
+  <testsuite name="Auth - Register / Register - Admin Role (Rejected)" id="c6f1223d-a749-4b3c-af38-4428ee004d30" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 400" time="0.003" classname="AuthRegisterRegisterAdminRoleRejected"/>
+    <testcase name="Admin role is rejected" time="0.003" classname="AuthRegisterRegisterAdminRoleRejected"/>
+  </testsuite>
+  <testsuite name="Auth - Login / Login - Client (Success)" id="9fdb2e51-9616-449d-acb0-25030362eebb" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.188">
+    <testcase name="Status code is 200" time="0.188" classname="AuthLoginLoginClientSuccess"/>
+    <testcase name="Client token generated" time="0.188" classname="AuthLoginLoginClientSuccess"/>
+  </testsuite>
+  <testsuite name="Auth - Login / Login - Freelancer (Success)" id="032769b2-de78-4e99-b102-7cc0e237f4af" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.190">
+    <testcase name="Status code is 200" time="0.190" classname="AuthLoginLoginFreelancerSuccess"/>
+    <testcase name="Freelancer token generated" time="0.190" classname="AuthLoginLoginFreelancerSuccess"/>
+  </testsuite>
+  <testsuite name="Auth - Login / Login - Wrong Password (Error)" id="698091a3-47c5-4217-85b1-2ef04859963b" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.188">
+    <testcase name="Status code is 401" time="0.188" classname="AuthLoginLoginWrongPasswordError"/>
+    <testcase name="Rejects wrong password" time="0.188" classname="AuthLoginLoginWrongPasswordError"/>
+  </testsuite>
+  <testsuite name="Auth - Login / Login - Non-Existent User (Error)" id="7778421e-96cb-4ee5-93f6-5ece45eb2cd1" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.369">
+    <testcase name="Status code is 401" time="0.369" classname="AuthLoginLoginNonExistentUserError"/>
+    <testcase name="No token issued" time="0.369" classname="AuthLoginLoginNonExistentUserError"/>
+  </testsuite>
+  <testsuite name="Auth - Login / Login - Malformed JSON (Error)" id="f85866a0-6182-46ce-be29-647bba922f51" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 400" time="0.002" classname="AuthLoginLoginMalformedJsonError"/>
+    <testcase name="Controlled JSON parse error returned" time="0.002" classname="AuthLoginLoginMalformedJsonError"/>
+  </testsuite>
+  <testsuite name="Auth - Login / Login - Oversized Body (Error)" id="97277c3d-1163-4e7b-84d8-30f276e12c6a" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 413" time="0.002" classname="AuthLoginLoginOversizedBodyError"/>
+    <testcase name="Body size limit enforced" time="0.002" classname="AuthLoginLoginOversizedBodyError"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / List Gigs (Public)" id="2e22166c-e4a8-4bca-8b93-78993f10afe4" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 200" time="0.006" classname="GigsMarketplaceCrudAmpRbacListGigsPublic"/>
+    <testcase name="Returns a gig array" time="0.006" classname="GigsMarketplaceCrudAmpRbacListGigsPublic"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / List Gigs - Category Filter" id="260bc976-0d4c-4b23-94bd-b76e8d044f70" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 200" time="0.004" classname="GigsMarketplaceCrudAmpRbacListGigsCategoryFilter"/>
+    <testcase name="Only Design gigs returned" time="0.004" classname="GigsMarketplaceCrudAmpRbacListGigsCategoryFilter"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Get Gig Detail (Public)" id="17e4a5b2-ee0b-46f0-96ab-42267603ce21" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 200" time="0.004" classname="GigsMarketplaceCrudAmpRbacGetGigDetailPublic"/>
+    <testcase name="Gig has an id" time="0.004" classname="GigsMarketplaceCrudAmpRbacGetGigDetailPublic"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Create Gig - Freelancer (Success)" id="cd5b36ab-6be1-4e51-a256-83b2b281aa11" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 201" time="0.007" classname="GigsMarketplaceCrudAmpRbacCreateGigFreelancerSuccess"/>
+    <testcase name="Gig created" time="0.007" classname="GigsMarketplaceCrudAmpRbacCreateGigFreelancerSuccess"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Create Gig - Client (Rejected)" id="fb0642ac-6cac-4576-a080-2b1bfbb00b3f" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 403" time="0.003" classname="GigsMarketplaceCrudAmpRbacCreateGigClientRejected"/>
+    <testcase name="RBAC blocks clients" time="0.003" classname="GigsMarketplaceCrudAmpRbacCreateGigClientRejected"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Create Gig - No Token (Error)" id="434f56cd-8653-42eb-8b64-9b1a980715ee" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401" time="0.002" classname="GigsMarketplaceCrudAmpRbacCreateGigNoTokenError"/>
+    <testcase name="Auth required" time="0.002" classname="GigsMarketplaceCrudAmpRbacCreateGigNoTokenError"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Create Gig - Validation Error (Bad Input)" id="8c02ab29-0f18-4f19-b059-3bf71b25d980" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 400" time="0.004" classname="GigsMarketplaceCrudAmpRbacCreateGigValidationErrorBadInput"/>
+    <testcase name="Validation message returned" time="0.004" classname="GigsMarketplaceCrudAmpRbacCreateGigValidationErrorBadInput"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Create Gig - XSS Stripped" id="6e91858d-abb3-49e7-89fc-d2363565e468" timestamp="2026-10-12T13:12:37.295Z" tests="3" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 201" time="0.006" classname="GigsMarketplaceCrudAmpRbacCreateGigXssStripped"/>
+    <testcase name="Script tags removed from title" time="0.006" classname="GigsMarketplaceCrudAmpRbacCreateGigXssStripped"/>
+    <testcase name="Image tags removed from description" time="0.006" classname="GigsMarketplaceCrudAmpRbacCreateGigXssStripped"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Update Gig - Owner (Success)" id="42615e00-1651-4925-8b0c-bdc54520d5b2" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="Status code is 200" time="0.008" classname="GigsMarketplaceCrudAmpRbacUpdateGigOwnerSuccess"/>
+    <testcase name="Price updated" time="0.008" classname="GigsMarketplaceCrudAmpRbacUpdateGigOwnerSuccess"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / Update Gig - Non-Owner (Rejected)" id="5b95b5d4-b7f2-4add-ac36-e1112ebbf21a" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 403" time="0.004" classname="GigsMarketplaceCrudAmpRbacUpdateGigNonOwnerRejected"/>
+    <testcase name="Ownership enforced" time="0.004" classname="GigsMarketplaceCrudAmpRbacUpdateGigNonOwnerRejected"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / My Gigs - Freelancer (Success)" id="c38bdd03-b6f3-444c-b6d9-c63c4f7588cc" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Status code is 200" time="0.005" classname="GigsMarketplaceCrudAmpRbacMyGigsFreelancerSuccess"/>
+    <testcase name="Returns own gigs" time="0.005" classname="GigsMarketplaceCrudAmpRbacMyGigsFreelancerSuccess"/>
+  </testsuite>
+  <testsuite name="Gigs - Marketplace CRUD &amp; RBAC / My Gigs - Client (Rejected)" id="28605b04-8407-44dd-99a6-4c7760ccee61" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 403" time="0.003" classname="GigsMarketplaceCrudAmpRbacMyGigsClientRejected"/>
+    <testcase name="RBAC blocks client" time="0.003" classname="GigsMarketplaceCrudAmpRbacMyGigsClientRejected"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / Create Booking - Client (Success)" id="d88efaab-c534-4e2c-b00b-532ddbd82f6d" timestamp="2026-10-12T13:12:37.295Z" tests="3" failures="0" errors="0" time="0.015">
+    <testcase name="Status code is 201" time="0.015" classname="BookingsSimulatedPaymentsCreateBookingClientSuccess"/>
+    <testcase name="Booking confirmed" time="0.015" classname="BookingsSimulatedPaymentsCreateBookingClientSuccess"/>
+    <testcase name="Transaction reference created" time="0.015" classname="BookingsSimulatedPaymentsCreateBookingClientSuccess"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / Create Booking - Freelancer (Rejected)" id="c2caa4c0-2d18-4883-bf1b-775bc84449d0" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 403" time="0.003" classname="BookingsSimulatedPaymentsCreateBookingFreelancerRejected"/>
+    <testcase name="RBAC blocks freelancer booking" time="0.003" classname="BookingsSimulatedPaymentsCreateBookingFreelancerRejected"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / Create Booking - No Token (Error)" id="ebc522e2-8d5e-4c93-8d58-5da59e217057" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401" time="0.002" classname="BookingsSimulatedPaymentsCreateBookingNoTokenError"/>
+    <testcase name="Auth required" time="0.002" classname="BookingsSimulatedPaymentsCreateBookingNoTokenError"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / Create Booking - Missing Gig (Error)" id="9e858258-6201-421a-86e0-4c8f0e4f4a75" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 404" time="0.004" classname="BookingsSimulatedPaymentsCreateBookingMissingGigError"/>
+    <testcase name="Missing gig rejected" time="0.004" classname="BookingsSimulatedPaymentsCreateBookingMissingGigError"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / List My Bookings - Client (Success)" id="48126208-5780-4a60-8453-082a4811d5d9" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Status code is 200" time="0.005" classname="BookingsSimulatedPaymentsListMyBookingsClientSuccess"/>
+    <testcase name="Client bookings include the new one" time="0.005" classname="BookingsSimulatedPaymentsListMyBookingsClientSuccess"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / List Bookings on My Gigs - Freelancer (Success)" id="cb2b9534-f32d-43cc-8807-1397819533f9" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 200" time="0.006" classname="BookingsSimulatedPaymentsListBookingsOnMyGigsFreelancerSuccess"/>
+    <testcase name="Freelancer sees bookings on their gigs" time="0.006" classname="BookingsSimulatedPaymentsListBookingsOnMyGigsFreelancerSuccess"/>
+  </testsuite>
+  <testsuite name="Bookings - Simulated Payments / Get Booking Detail" id="0e125778-8bc4-41fa-84a5-5be3eccbaaad" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 200" time="0.006" classname="BookingsSimulatedPaymentsGetBookingDetail"/>
+    <testcase name="Booking matches reference" time="0.006" classname="BookingsSimulatedPaymentsGetBookingDetail"/>
+  </testsuite>
+  <testsuite name="Income - Freelancer Earnings / Get Income - Freelancer (Success)" id="81233a5f-7090-40e9-9c78-7756d1164669" timestamp="2026-10-12T13:12:37.295Z" tests="3" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 200" time="0.006" classname="IncomeFreelancerEarningsGetIncomeFreelancerSuccess"/>
+    <testcase name="Aggregated income returned" time="0.006" classname="IncomeFreelancerEarningsGetIncomeFreelancerSuccess"/>
+    <testcase name="Includes postman transaction" time="0.006" classname="IncomeFreelancerEarningsGetIncomeFreelancerSuccess"/>
+  </testsuite>
+  <testsuite name="Income - Freelancer Earnings / Get Income - Client (Rejected)" id="bd5dbf25-b05e-41a4-a326-dd04263159b7" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 403" time="0.004" classname="IncomeFreelancerEarningsGetIncomeClientRejected"/>
+    <testcase name="RBAC blocks clients" time="0.004" classname="IncomeFreelancerEarningsGetIncomeClientRejected"/>
+  </testsuite>
+  <testsuite name="Income - Freelancer Earnings / Get Income - No Token (Error)" id="ace8cc98-4a3a-4f6f-8c8f-14842ad8d512" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.001">
+    <testcase name="Status code is 401" time="0.001" classname="IncomeFreelancerEarningsGetIncomeNoTokenError"/>
+    <testcase name="Auth required" time="0.001" classname="IncomeFreelancerEarningsGetIncomeNoTokenError"/>
+  </testsuite>
+  <testsuite name="Cleanup - Gig Delete / Delete Gig - Non-Owner (Rejected)" id="94422f2c-1b81-49d1-9cc4-c842d73ccf0c" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 403" time="0.003" classname="CleanupGigDeleteDeleteGigNonOwnerRejected"/>
+    <testcase name="Ownership enforced on delete" time="0.003" classname="CleanupGigDeleteDeleteGigNonOwnerRejected"/>
+  </testsuite>
+  <testsuite name="Cleanup - Gig Delete / Delete Gig - Owner (Success)" id="d5639c52-f254-41b8-961a-af7054a4f763" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 200" time="0.007" classname="CleanupGigDeleteDeleteGigOwnerSuccess"/>
+    <testcase name="Gig deleted" time="0.007" classname="CleanupGigDeleteDeleteGigOwnerSuccess"/>
+  </testsuite>
+  <testsuite name="Cleanup - Gig Delete / Deleted Gig No Longer Listed (Error)" id="928ee22a-c082-431f-acd4-dabfd992f48c" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 404" time="0.003" classname="CleanupGigDeleteDeletedGigNoLongerListedError"/>
+    <testcase name="Gone" time="0.003" classname="CleanupGigDeleteDeletedGigNoLongerListedError"/>
+  </testsuite>
+  <testsuite name="Protected Routes - JWT / Profile - Authenticated (Success)" id="b046dbb3-a818-4bd7-b1f5-6e9c2aad6f49" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 200" time="0.003" classname="ProtectedRoutesJwtProfileAuthenticatedSuccess"/>
+    <testcase name="Returns user from token" time="0.003" classname="ProtectedRoutesJwtProfileAuthenticatedSuccess"/>
+  </testsuite>
+  <testsuite name="Protected Routes - JWT / Profile - No Token (Error)" id="61586ef2-147a-418e-af6b-2a8d848a7098" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401" time="0.002" classname="ProtectedRoutesJwtProfileNoTokenError"/>
+    <testcase name="Rejects missing token" time="0.002" classname="ProtectedRoutesJwtProfileNoTokenError"/>
+  </testsuite>
+  <testsuite name="Protected Routes - JWT / Profile - Invalid Token (Error)" id="8ae542eb-f3a2-465c-8808-a8f6585373ec" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401" time="0.002" classname="ProtectedRoutesJwtProfileInvalidTokenError"/>
+    <testcase name="Rejects garbage token" time="0.002" classname="ProtectedRoutesJwtProfileInvalidTokenError"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Security Headers - SPA (CSP / nosniff)" id="3257a21f-7a78-4dd0-bb5b-f910af73e6d7" timestamp="2026-10-12T13:12:37.295Z" tests="3" failures="0" errors="0" time="0.003">
+    <testcase name="CSP frame-ancestors denies embedding" time="0.003" classname="SecurityAmpHardeningSecurityHeadersSpaCspNosniff"/>
+    <testcase name="nosniff header set" time="0.003" classname="SecurityAmpHardeningSecurityHeadersSpaCspNosniff"/>
+    <testcase name="x-powered-by hidden" time="0.003" classname="SecurityAmpHardeningSecurityHeadersSpaCspNosniff"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / 404 - Unknown API Route (Error)" id="8bbefe8e-e86a-4a0d-8b1c-d85bd80f8891" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 404" time="0.003" classname="SecurityAmpHardening404UnknownApiRouteError"/>
+    <testcase name="Controlled 404 JSON" time="0.003" classname="SecurityAmpHardening404UnknownApiRouteError"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / NoSQL Injection - Booking (Neutralised)" id="c58e8f4e-3a3b-4058-b627-efea2197c07a" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 400" time="0.002" classname="SecurityAmpHardeningNoSqlInjectionBookingNeutralised"/>
+    <testcase name="Injection rejected with a controlled error" time="0.002" classname="SecurityAmpHardeningNoSqlInjectionBookingNeutralised"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / NoSQL Injection - Gig Query (Neutralised)" id="0dd2bf7a-f131-474f-b94a-c452ae7b748c" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Status code is 404" time="0.003" classname="SecurityAmpHardeningNoSqlInjectionGigQueryNeutralised"/>
+    <testcase name="Unknown id rejected" time="0.003" classname="SecurityAmpHardeningNoSqlInjectionGigQueryNeutralised"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 1 (401)" id="40026b2e-b9e6-48c2-ba3c-22d65f6dfa74" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.178">
+    <testcase name="Status code is 401 or 429" time="0.178" classname="SecurityAmpHardeningLoginBurnAuthBudget1401"/>
+    <testcase name="Attempt handled" time="0.178" classname="SecurityAmpHardeningLoginBurnAuthBudget1401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 2 (401)" id="0c222b54-94ae-4509-9c2a-2eb5e9fc6da0" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.179">
+    <testcase name="Status code is 401 or 429" time="0.179" classname="SecurityAmpHardeningLoginBurnAuthBudget2401"/>
+    <testcase name="Attempt handled" time="0.179" classname="SecurityAmpHardeningLoginBurnAuthBudget2401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 3 (401)" id="f5cb4bbc-6ccc-474a-8447-05efd4b8c2a1" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.174">
+    <testcase name="Status code is 401 or 429" time="0.174" classname="SecurityAmpHardeningLoginBurnAuthBudget3401"/>
+    <testcase name="Attempt handled" time="0.174" classname="SecurityAmpHardeningLoginBurnAuthBudget3401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 4 (401)" id="bcd42c4d-41a4-44c1-a3ea-fbe047ebcbfb" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.179">
+    <testcase name="Status code is 401 or 429" time="0.179" classname="SecurityAmpHardeningLoginBurnAuthBudget4401"/>
+    <testcase name="Attempt handled" time="0.179" classname="SecurityAmpHardeningLoginBurnAuthBudget4401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 5 (401)" id="6b985f62-390c-470f-833d-089a9907c753" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.171">
+    <testcase name="Status code is 401 or 429" time="0.171" classname="SecurityAmpHardeningLoginBurnAuthBudget5401"/>
+    <testcase name="Attempt handled" time="0.171" classname="SecurityAmpHardeningLoginBurnAuthBudget5401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 6 (401)" id="e0c123b1-bb41-4da6-a6d7-8ac139c5fe23" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401 or 429" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget6401"/>
+    <testcase name="Attempt handled" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget6401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 7 (401)" id="a8db82e2-12c2-4e8e-9696-f2131259b484" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401 or 429" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget7401"/>
+    <testcase name="Attempt handled" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget7401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 8 (401)" id="c8488343-eeb9-4daf-a1c6-7344b4356aac" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401 or 429" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget8401"/>
+    <testcase name="Attempt handled" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget8401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 9 (401)" id="b9ebf70b-5980-4074-b9c0-efa0f2e245fb" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401 or 429" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget9401"/>
+    <testcase name="Attempt handled" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget9401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Login - Burn Auth Budget 10 (401)" id="255ac80c-a83a-433b-9b61-b90e2fb39b74" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Status code is 401 or 429" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget10401"/>
+    <testcase name="Attempt handled" time="0.002" classname="SecurityAmpHardeningLoginBurnAuthBudget10401"/>
+  </testsuite>
+  <testsuite name="Security &amp; Hardening / Rate Limit - Login Throttled (429)" id="e57d49ab-8bfe-4215-bcb6-a4e43bd5b10f" timestamp="2026-10-12T13:12:37.295Z" tests="2" failures="0" errors="0" time="0.002">
+    <testcase name="Login requests are throttled with HTTP 429" time="0.002" classname="SecurityAmpHardeningRateLimitLoginThrottled429"/>
+    <testcase name="Throttle message returned" time="0.002" classname="SecurityAmpHardeningRateLimitLoginThrottled429"/>
+  </testsuite>
+</testsuites>
