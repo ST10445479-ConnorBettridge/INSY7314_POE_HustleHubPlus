@@ -12,6 +12,7 @@ const transactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Booking',
       required: true,
+      unique: true,
     },
     gig: {
       type: mongoose.Schema.Types.ObjectId,

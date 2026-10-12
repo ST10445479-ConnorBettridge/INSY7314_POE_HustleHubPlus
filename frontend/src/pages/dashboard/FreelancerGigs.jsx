@@ -26,7 +26,7 @@ export default function FreelancerGigs() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this gig permanently? Related bookings will also be removed.')) {
+    if (!window.confirm('Delete this listing? Existing bookings and income history will be kept.')) {
       return;
     }
     try {

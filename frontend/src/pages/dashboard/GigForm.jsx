@@ -60,7 +60,7 @@ export default function GigForm() {
     if (form.description.trim().length < 10) next.description = 'Description must be at least 10 characters';
     if (form.category.trim().length < 2) next.category = 'Category is required';
     const price = Number(form.price);
-    if (!Number.isFinite(price) || price < 1) next.price = 'Enter a price of at least 1';
+    if (!Number.isFinite(price) || price < 1 || price > 1000000 || !/^\d+(\.\d{1,2})?$/.test(form.price)) next.price = 'Enter 1 to 1000000, with at most two decimal places';
     const days = Number(form.deliveryDays);
     if (!Number.isInteger(days) || days < 1 || days > 365) next.deliveryDays = 'Whole days between 1 and 365';
     setErrors(next);
@@ -136,6 +136,8 @@ export default function GigForm() {
             <input
               type="number"
               min="1"
+              max="1000000"
+              step="0.01"
               value={form.price}
               onChange={set('price')}
               placeholder="150"

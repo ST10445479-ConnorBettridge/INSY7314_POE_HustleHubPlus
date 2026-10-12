@@ -1,9 +1,6 @@
 const express = require('express');
 const Gig = require('../models/gig');
-const Booking = require('../models/booking');
-const Transaction = require('../models/transaction');
 const User = require('../models/user');
-const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/roles');
 const { gigValidation, gigIdParamValidation } = require('../middleware/validate');
@@ -48,7 +45,7 @@ router.get('/', async (req, res, next) => {
 // An authenticated freelancer's own gigs (alias for ?mine=true).
 router.get('/mine', authenticate, requireRole('freelancer'), async (req, res, next) => {
   try {
-    const gigs = await Gig.find({ owner: req.user.id }).sort({ createdAt: -1 });
+    const gigs = await Gig.find({ owner: req.user.id, status: { $ne: 'deleted' } }).sort({ createdAt: -1 });
     const payload = await loadOwnerNames(gigs);
     res.status(200).json({ status: 'success', count: payload.length, data: { gigs: payload } });
   } catch (err) {
@@ -105,7 +102,7 @@ router.put(
   gigValidation,
   async (req, res, next) => {
     try {
-      const gig = await Gig.findById(req.params.id);
+      const gig = await Gig.findOne({ _id: req.params.id, status: { $ne: 'deleted' } });
       if (!gig) {
         return next(new AppError('Gig not found', 404));
       }
@@ -135,10 +132,10 @@ router.put(
   }
 );
 
-// Delete a gig (freelancer owner only). Cascades to its bookings and transactions.
+// Remove a listing from the marketplace while retaining financial history.
 router.delete('/:id', authenticate, requireRole('freelancer'), gigIdParamValidation, async (req, res, next) => {
   try {
-    const gig = await Gig.findById(req.params.id);
+    const gig = await Gig.findOne({ _id: req.params.id, status: { $ne: 'deleted' } });
     if (!gig) {
       return next(new AppError('Gig not found', 404));
     }
@@ -147,16 +144,10 @@ router.delete('/:id', authenticate, requireRole('freelancer'), gigIdParamValidat
       return next(new AppError('You can only delete your own gigs', 403));
     }
 
-    const session = await mongoose.startSession();
-    try {
-      await session.withTransaction(async () => {
-        await Booking.deleteMany({ gig: gig._id }).session(session);
-        await Transaction.deleteMany({ gig: gig._id }).session(session);
-        await gig.deleteOne({ _id: gig._id }).session(session);
-      });
-    } finally {
-      await session.endSession();
-    }
+    await Gig.updateOne(
+      { _id: gig._id, owner: req.user.id },
+      { $set: { status: 'deleted', deletedAt: new Date() } }
+    );
 
     logger.info('Gig deleted', { gigId: req.params.id });
 

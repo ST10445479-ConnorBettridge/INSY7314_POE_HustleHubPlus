@@ -32,6 +32,7 @@ export default function FreelancerIncome() {
   return (
     <div>
       <h2>Income</h2>
+      <p className="muted">Tax is a simplified project estimate using a flat 15.3% rate.</p>
       <div className="stats">
         <div className="card stat">
           <span className="stat-label">Total income</span>

@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../src/app');
 
-const registerUser = async ({ name, email, password = 'StrongPass1!', role }) => {
+const registerUser = async ({ name = 'Test User', email, password = 'StrongPass1!', role }) => {
   const res = await request(app).post('/api/auth/register').send({ name, email, password, role });
   if (res.status !== 201) {
     throw new Error(`registerUser(${email}) failed: ${res.status} ${JSON.stringify(res.body)}`);

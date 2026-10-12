@@ -37,28 +37,28 @@ router.post('/', authenticate, requireRole('client'), bookingValidation, async (
   try {
     const { gigId, note } = req.body;
 
-    const gig = await Gig.findOne({ _id: gigId, status: 'active' });
-    if (!gig) {
-      return next(new AppError('Gig not found or no longer available', 404));
-    }
-    if (gig.owner.toString() === req.user.id) {
-      return next(new AppError('You cannot book your own gig', 400));
-    }
-
-    const booking = await Booking.create({
-      gig: gig._id,
-      client: req.user.id,
-      freelancer: gig.owner,
-      note: note || '',
-      amount: gig.price,
-      status: 'confirmed',
-    });
     const reference =
       `TXN-${Date.now().toString(36).toUpperCase()}` +
-      crypto.randomBytes(3).toString('hex').toUpperCase();
-    let transaction;
-    try {
-      transaction = await Transaction.create({
+      crypto.randomBytes(8).toString('hex').toUpperCase();
+    let booking, transaction;
+    await mongoose.connection.transaction(async (session) => {
+      // Writing the gig serialises booking with edits/deletion of that listing.
+      const gig = await Gig.findOneAndUpdate(
+        { _id: gigId, status: 'active' },
+        { $inc: { bookingVersion: 1 } },
+        { returnDocument: 'after', session }
+      );
+      if (!gig) throw new AppError('Gig not found or no longer available', 404);
+      if (gig.owner.toString() === req.user.id) throw new AppError('You cannot book your own gig', 400);
+      [booking] = await Booking.create([{
+        gig: gig._id,
+        client: req.user.id,
+        freelancer: gig.owner,
+        note: note || '',
+        amount: gig.price,
+        status: 'confirmed',
+      }], { session });
+      [transaction] = await Transaction.create([{
         reference,
         booking: booking._id,
         gig: gig._id,
@@ -67,19 +67,8 @@ router.post('/', authenticate, requireRole('client'), bookingValidation, async (
         amount: gig.price,
         type: 'booking',
         status: 'completed',
-      });
-    } catch (transactionError) {
-      // Keep the demo datastore consistent if the simulated payment record fails.
-      try {
-        await Booking.deleteOne({ _id: booking._id });
-      } catch (rollbackError) {
-        logger.error('Booking rollback failed after transaction creation error', {
-          bookingId: booking._id.toString(),
-          error: rollbackError.message,
-        });
-      }
-      throw transactionError;
-    }
+      }], { session });
+    });
     logger.info('Booking created with transaction', {
       bookingId: booking._id.toString(),
       txnId: transaction._id.toString(),

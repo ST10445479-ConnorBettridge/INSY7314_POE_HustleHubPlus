@@ -44,9 +44,11 @@ const gigSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'closed'],
+      enum: ['active', 'closed', 'deleted'],
       default: 'active',
     },
+    bookingVersion: { type: Number, default: 0 },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

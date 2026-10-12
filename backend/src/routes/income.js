@@ -18,9 +18,9 @@ router.get('/', authenticate, requireRole('freelancer'), async (req, res, next) 
 
     const totalIncome = transactions
       .filter((t) => t.status === 'completed' && t.type === 'booking')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Math.round(t.amount * 100), 0) / 100;
 
-    // SECA-style self-employment estimate (see README): 15.3%.
+    // Simplified project estimate; this is a configured demo calculation.
     const TAX_RATE = 0.153;
     const taxEstimate = Math.round(totalIncome * TAX_RATE * 100) / 100;
     const netIncome = Math.round((totalIncome - taxEstimate) * 100) / 100;
